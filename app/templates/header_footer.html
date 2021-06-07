@@ -9,22 +9,11 @@
 {% block head %}
 
 
-{{super()}} <!--
+{{super()}} 
 
-                 Actually just includes everything form parent block first.
-
-                 then makes our additions
-
-                 -->
-
-<!--suppress TodoComment -->
 <link rel="icon" type="image/x-icon" href="{{ url_for('static' , filename='ic.ico') }}">
 
-<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-<!-- <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/mystyle.css') }}"> -->
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/globalStyle.css') }}">
 
 
 {% endblock %}
