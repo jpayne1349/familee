@@ -1,2 +1,1 @@
-# familee
-a personal family tree web app
+a personal family tree app
