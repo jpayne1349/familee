@@ -9,3 +9,4 @@ A few notes for the startup of a new project.
 
 4. create a .gitignore file if necessary.
 
+5. 

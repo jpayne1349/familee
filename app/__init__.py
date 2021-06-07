@@ -1,13 +1,12 @@
 
 from flask import Flask
 from flask_migrate import Migrate
-from flask_login import LoginManager
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 migrate = Migrate()
 
-# login_manager = LoginManager() # USE FOR LOGIN PAGE IF NEEDED
 
 def create_app():
     """Initialize the core application."""
@@ -18,10 +17,6 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
-
-    #login_manager.init_app(app) # USE FOR LOGIN PAGE IF NEEDED
-
-    #login_manager.login_view = 'authorization_bp.login_page' # USE FOR LOGIN PAGE IF NEEDED
 
     with app.app_context():
 
