@@ -13,8 +13,7 @@ def create_app():
     app = Flask(__name__, instance_relative_config=False)
 
     app.config.from_object('config.DevelopmentConfig') # grabbing the development config class out of config.py
-    # our config file will be located elsewhere
-
+    
     db.init_app(app)
     migrate.init_app(app, db)
 
