@@ -1,0 +1,20 @@
+
+
+Postgres Database
+Useful commands
+ postgres server interactive shell: psql
+ connect to database: \c _name
+ create a new database: CREATE DATABASE family_tree;
+ create a user, if not already: CREATE USER jpayne WITH PASSWORD 'Password';
+ grant privelages: GRANT ALL PRIVILEGES ON DATABASE family_tree to jpayne;
+
+ create extension ltree: CREATE EXTENSION IF NOT EXISTS ltree;
+
+ delete a database: DROP DATABASE _name;
+Helpful commands inside shell
+ list all databases: \l
+ quit from shell: \q
+
+
+
+

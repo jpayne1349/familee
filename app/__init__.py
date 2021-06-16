@@ -23,7 +23,7 @@ def create_app():
 
         app.register_blueprint(main.main_blueprint)  # registering the blueprint inside that file
 
-        #from . import models  # USED WHEN DB IS NEEDED
+        from . import models  # USED WHEN DB IS NEEDED
 
         return app
 

@@ -3,3 +3,5 @@
 config.py
 env
 app.db
+migrations
+projectNotes

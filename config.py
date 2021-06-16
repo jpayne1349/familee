@@ -20,7 +20,8 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL') or "postgresql://jpayne:baseball13@localhost:5432/family_tree"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
