@@ -1,6 +1,6 @@
 
 .vscode
-config.py
+config
 env
 app.db
 migrations
