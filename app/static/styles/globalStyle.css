@@ -1,0 +1,143 @@
+
+:root {
+    --red: hsl(0, 78%, 62%);
+    --cyan: hsl(180, 62%, 55%);
+    --orange: hsl(34, 97%, 64%);
+    --blue: hsl(212, 86%, 64%);
+    --pink: hsl(293, 86%, 64%);
+    --varyDarkBlue: hsl(234, 12%, 34%);
+    --grayishBlue: hsl(229, 6%, 66%);
+    --veryLightGray: hsl(0, 0%, 98%);
+    --weight1: 200;
+    --weight2: 400;
+    --weight3: 600;
+}
+
+body {
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--veryLightGray);
+}
+
+.button {
+    width: 100px;
+    height: auto;
+
+}
+
+.person {
+    /* custom stuff maybe */
+
+
+}
+
+#tree_container {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.branch {
+    display: flex;
+    flex-direction: row;
+    border: 3px solid #333333;
+    justify-content: center;
+}
+
+/* page title is h1 */
+h1:first-of-type {
+    font-weight: var(--weight1);
+    color: var(--varyDarkBlue);
+
+}
+
+h1:last-of-type {
+    color: var(--varyDarkBlue);
+}
+
+/* 400 px or less */
+@media (max-width: 400px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+.header {
+    text-align: center;
+    line-height: 0.8;
+    margin-bottom: 50px;
+    margin-top: 100px;
+}
+
+.header p {
+    margin: 0 auto;
+    line-height: 2;
+    color: var(--grayishBlue);
+}
+
+/* paragraph text inside box */
+.box p {
+    color: var(--grayishBlue);
+}
+
+.box {
+    border-radius: 5px;
+    box-shadow: 0px 30px 40px -20px var(--grayishBlue);
+    padding: 30px;
+    margin: 20px;
+    max-width: 300px;
+}
+
+img {
+    float: right;
+}
+
+/*  450 or less */
+@media (max-width: 450px) {
+    .box {
+        height: 60px;
+    }
+}
+
+/* between 950 and 450 */
+@media (max-width: 950px) and (min-width: 450px) {
+    .box {
+        text-align: center;
+        height: 80px;
+    }
+}
+
+/* top box border colors ? */
+.cyan {
+    border-top: 3px solid var(--cyan);
+}
+.red {
+    border-top: 3px solid var(--red);
+}
+.blue {
+    border-top: 3px solid var(--blue);
+}
+.orange {
+    border-top: 3px solid var(--orange);
+}
+.pink {
+    border-top: 3px solid var(--pink);
+}
+
+/* card title */
+h2 {
+    color: var(--varyDarkBlue);
+    font-weight: var(--weight3);
+}
+
+/* greater than 950 */
+@media (min-width: 950px) {
+
+    .box {
+        width: 20%;
+     
+    }
+    .header p {
+        width: 30%;
+    }
+    
+}

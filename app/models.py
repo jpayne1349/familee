@@ -12,7 +12,7 @@ class relation_table(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     relation_type = db.Column(db.Integer)
     # 0 parent to child, 1 child to child, 2 parent to parent
-    person_a_id = db.Column(db.Integer)
+    person_a_id = db.Column(db.Integer, db.ForeignKey('person.id')) # PERSON A IS ALWAYS PARENT
     person_b_id = db.Column(db.Integer)
 
 class Person(db.Model):
