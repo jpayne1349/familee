@@ -23,7 +23,7 @@ class Person(db.Model):
     dateOfBirth = db.Column(db.String(8)) # YYYYMMDD, unknown == 00's
     dateOfDeath = db.Column(db.String(8)) # YYYYMMDD
     details = db.Column(db.String(280))
-    gender = db.Column(db.Integer)
+    gender = db.Column(db.Integer) # 0 for female, 1 for male
         
     relationships = db.relationship('relation_table', backref='owner', lazy=True)
 

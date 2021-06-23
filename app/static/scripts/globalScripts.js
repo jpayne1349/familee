@@ -1,15 +1,13 @@
-// TODO: rethinking how to display..
-    // only build display cards for the people considered 'direct' to the root
-    // basically only build cards for parents. parents of parents. etc.
-    // all cards tho, should include any sibling relationships, no matter what.
+// TODO: add ability to assign a relationship within create person
+    // includes either another ajax call, or rewriting the existing
+    // or no.. just include more info in the json request for create_person. 
+    // to be deciphered on python end.
+    // whether or not to call relation_table() etc...
 
-    // in the future, building out a tree based on someone with children will be more difficult.
+    // next display people who arent in the tree
+    // add a way to modify their profile
 
-    // so every person is a 'Person' object.
-
-    // we cant check for everyone at this point? right
-    // we have to check the root for children..
-    // if none, that's good. it will be the base.
+    // add DELETE person ability, maybe within their profile view.
 
 
 
@@ -43,6 +41,8 @@ class Person {
         this.hasChildren = false;
 
         this.branchLevel;
+        this.cardNumber;
+        this.parentCardSet = false;
         this.hasIcon = false;
         this.iconHolder;
     }
@@ -120,6 +120,184 @@ class Person {
 }
 
 
+// call when needing to add a person to the database
+// rough for the first iteration
+function create_new_person() {
+    // perform a check to see if this form is already available?
+
+
+
+    // maybe we just have a popup for now. just something quick
+    let container = document.createElement('div');
+    let form_holder = document.createElement('form');
+    form_holder.name = 'create_person';
+    form_holder.setAttribute('onsubmit', 'event.preventDefault();');
+    let form_title = document.createElement('div');
+    
+
+    let gName_div = document.createElement('div');
+    let gName_input = document.createElement('input');
+    gName_input.type = 'text';
+    gName_input.autocomplete = 'off';
+    gName_input.placeholder = 'Given Name - required';
+    gName_div.appendChild(gName_input);
+    form_holder.appendChild(gName_div);
+    
+    let fName_div = document.createElement('div');
+    let fName_input = document.createElement('input');
+    fName_input.type = 'text';
+    fName_input.autocomplete = 'off';
+    fName_input.placeholder = 'Family Name';
+    fName_div.appendChild(fName_input);
+    form_holder.appendChild(fName_div);
+
+    let gender_div = document.createElement('div');
+    let gender_male = document.createElement('input');
+    let male_label = document.createElement('label');
+    gender_male.id = 'male_radio';
+    gender_male.value = 1;
+    male_label.for = 'male_radio';
+    male_label.innerText = 'Male';
+    gender_male.type = 'checkbox';
+
+    let gender_female = document.createElement('input');
+    let female_label = document.createElement('label');
+    gender_female.id = 'female_radio';
+    gender_female.value = 0;
+    female_label.for = 'female_radio';
+    female_label.innerText = 'Female';
+    gender_female.type = 'checkbox';
+
+    gender_div.append(gender_male, male_label, gender_female, female_label);
+    form_holder.appendChild(gender_div);
+
+    let dob_div = document.createElement('div');
+    let date_of_birth = document.createElement('input');
+    date_of_birth.type = 'date';
+    date_of_birth.autocomplete = 'off';
+    date_of_birth.placeholder = 'Date of Birth';
+    dob_div.appendChild(date_of_birth);
+    form_holder.appendChild(dob_div);
+
+    let dod_div = document.createElement('div');
+    let date_of_death = document.createElement('input');
+    date_of_death.type = 'date';
+    date_of_death.autocomplete = 'off';
+    date_of_death.placeholder = 'Date of Death';
+    dod_div.appendChild(date_of_death);
+    form_holder.appendChild(dod_div);
+
+    let details_div = document.createElement('div');
+    let details = document.createElement('input');
+    details.type = 'text';
+    details.autocomplete = 'off';
+    details.placeholder = 'Details';
+    details_div.appendChild(details);
+    form_holder.appendChild(details_div);
+
+    let create_div = document.createElement('div');
+    let create_button = document.createElement('button');
+    create_button.innerText = 'Create';
+    create_div.appendChild(create_button);
+    form_holder.appendChild(create_div);
+    create_button.addEventListener('click', validate_and_post);
+
+
+
+    // all these are put in the container and the container added to the screen
+    // obviously they need names and what not
+    
+    
+    container.appendChild(form_holder);
+
+    page.appendChild(container);
+
+
+    function validate_and_post() {
+
+        if(checkRequiredFields()) {
+            
+
+            // and we create the person object in javascript here.
+            // assuming that the database operation happens correctly
+            // maybe we do the database entry, and then on the response we create the javascript Person
+            let new_person_object = {};
+            new_person_object.givenName = gName_input.value;
+            new_person_object.familyName = fName_input.value;
+            new_person_object.dateOfBirth = date_of_birth.value;
+            new_person_object.dateOfDeath = date_of_death.value;
+            new_person_object.details = details.value;
+            if(gender_male.checked == true) {
+                new_person_object.gender = 1;
+            } else {
+                new_person_object.gender = 0;
+            }
+            
+            let json_string = JSON.stringify(new_person_object);
+
+            console.log(new_person_object);
+
+            // post section
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.onload = function() {
+                var json_string = this.response;
+                js_array = JSON.parse(json_string);
+        
+                js_array.forEach( function(json_object) {
+                    var person_instance = new Person(json_object);
+
+                    PERSON_ARRAY.push(person_instance);
+                } );
+
+                // next up is the addition of relationship, on create person maybe.
+                
+            };
+
+            
+
+            ajax_request.open("POST", "/create_person");
+            ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
+            ajax_request.send(json_string);
+
+            return false
+        
+        }
+
+        function checkRequiredFields() {
+            let required_bool = true;
+            console.log(gName_input.value);
+            console.log(gender_male.checked);
+            console.log(gender_female.checked);
+
+
+            if(!gName_input.value) {
+                // set givenName outline to red
+                gName_input.style.borderColor = 'orangered';
+                required_bool = false;
+            }
+            if(gender_male.checked == false && gender_female.checked == false) {
+                male_label.style.color = 'orangered';
+                female_label.style.color = 'orangered';
+                required_bool = false;
+            }
+
+            if(gender_male.checked == true && gender_female.checked == true) {
+                gender_male.checked = false;
+                gender_female.checked = false;
+                male_label.style.color = 'orangered';
+                female_label.style.color = 'orangered';
+                required_bool = false;
+            }
+            
+            return required_bool
+        }
+        
+    }
+
+}
+
+// being called after all database info has been loaded. 
+// builds html elements and assigns css order values to organize visuals
 function build_tree(selected_person) {
 
     // empty buffer
@@ -127,6 +305,8 @@ function build_tree(selected_person) {
 
     // gonna set the branchLevel of the root person outside of the loop
     selected_person.branchLevel = 1;
+    // card number locates left to right within branch
+    selected_person.cardNumber = 1;
 
     // put the root person into the buffer to be processed first
     person_buffer.push(selected_person);
@@ -137,9 +317,9 @@ function build_tree(selected_person) {
         let person_to_build = person_buffer[0];
 
         // make the card and possibly the branch. append card to branch
-        // also need an elegant way to assign an order:value in css for each actual card.
         let their_branch = person_to_build.get_branch(person_to_build.branchLevel);
         let their_card = person_to_build.get_card('box');
+        their_card.style.order = person_to_build.cardNumber;
         their_branch.appendChild(their_card);
 
         // loop their siblings and add them
@@ -148,9 +328,17 @@ function build_tree(selected_person) {
             their_card.appendChild(sib_card);
         }
 
-        // loop through their parents and set their branchLevel, and add them to the buffer
+        // loop through their parents and set their branchLevel & cardNumber, and add them to the buffer
         for( let parent of person_to_build.parents ) {
             parent.branchLevel = person_to_build.branchLevel + 1;
+            
+            if( person_to_build.parentCardSet == false ) {
+                parent.cardNumber = (person_to_build.cardNumber * 2) - 1;
+                person_to_build.parentCardSet = true;
+            } else {
+                parent.cardNumber = person_to_build.cardNumber * 2;
+            }
+
             person_buffer.push(parent);
         }
 
@@ -216,7 +404,7 @@ function get_person_list() {
 
         var json_string = this.response;
         js_array = JSON.parse(json_string);
-
+        
         js_array.forEach( function(json_object) {
             var person_instance = new Person(json_object);
 
@@ -257,9 +445,9 @@ function get_relation_list() {
 var page = document.body;
 
 var button = document.createElement('button');
-//button.addEventListener('click', get_person_list);
+button.addEventListener('click', create_new_person);
 button.className = 'button';
-button.innerText = 'test button';
+button.innerText = 'create person';
 page.appendChild(button);
 
 var button2 = document.createElement('button');

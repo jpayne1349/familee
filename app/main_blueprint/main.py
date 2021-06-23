@@ -29,6 +29,28 @@ def pull_all_relation():
     jsonList = relationObjectsToJson(all_relations)
     return jsonList
 
+@main_blueprint.route('/create_person', methods=['POST'])
+def create_person():
+    
+    person = request.json
+    
+    print(person)
+    print(type(person))
+    # TODO: check for same given name in db
+    # notify user before duplicate entry
+    # maybe doesnt matter if other information can identify
+    
+
+    new_person = Person(givenName = person["givenName"], familyName = person["familyName"], dateOfBirth=person["dateOfBirth"], dateOfDeath=person["dateOfDeath"], details=person["details"], gender=person["gender"])
+
+    db.session.add(new_person)
+    db.session.commit()
+
+    # new_person now should have an id..
+    json_person = personObjectsToJson([new_person])
+
+    return json_person
+  
 # turns the database objects into a python dictionary, which can be converted to JSON
 # TODO: manual input of the attributes was required. Maybe it's not neccessary? the properties of an object can be collected in a loop? 
 def personObjectsToJson(person_list):
