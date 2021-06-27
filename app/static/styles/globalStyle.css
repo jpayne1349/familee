@@ -25,12 +25,22 @@ body {
     width: 100px;
     height: auto;
 }
+.branch {
+    display: flex;
+    flex-direction: row;
+    border: 3px solid #333333;
+    justify-content: center;
+}
+.leaf {
+    display: flex;
+}
 .card {
     border-radius: 5px;
     box-shadow: 0px 30px 40px -20px var(--grayishBlue);
     padding: 15px 30px;
     margin: 20px;
-    max-width: 300px;
+    max-width: 230px;
+    min-height: 60px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -78,9 +88,9 @@ body {
 
 #tree_container {
     display: flex;
-    /* flex-direction: column-reverse; */
-    flex-wrap: wrap-reverse;
-    justify-content: center;
+    flex-direction: column-reverse;
+    /* flex-wrap: wrap-reverse;
+    justify-content: center; */
 }
 
 #create_person_container {
@@ -138,12 +148,7 @@ body {
 }
 
 
-.branch {
-    display: flex;
-    flex-direction: row;
-    border: 3px solid #333333;
-    justify-content: center;
-}
+
 
 /* page title is h1 */
 h1:first-of-type {
@@ -188,15 +193,14 @@ img {
 /*  450 or less */
 @media (max-width: 450px) {
     .card {
-        height: 60px;
+        
     }
 }
 
 /* between 950 and 450 */
 @media (max-width: 950px) and (min-width: 450px) {
     .card {
-        text-align: center;
-        height: 80px;
+        
     }
 }
 
@@ -226,12 +230,5 @@ h2 {
 /* greater than 950 */
 @media (min-width: 950px) {
 
-    .card {
-        width: 20%;
-     
-    }
-    .header p {
-        width: 30%;
-    }
     
 }

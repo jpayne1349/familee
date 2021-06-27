@@ -1,7 +1,7 @@
 // TODO: 
-    // want to add a different branch approach. each row could have multiple branches?
-    // branches above 2 have at least 4 people. need to organize those 4 people better.
-
+    // 
+    //
+    
     //
 
     // next display people who arent in the tree
@@ -104,9 +104,10 @@ class Person {
         var delete_div = document.createElement('div');
         delete_div.className = 'delete_cardholder';
         delete_div.innerText = 'X';
-        delete_div.id = this.id;
+
         delete_div.addEventListener('click', function() {
-            delete_person(this.id);
+            var owner = delete_div.nextSibling;
+            delete_person(owner.id);
         });
 
         var person_div = document.createElement('div');
@@ -133,16 +134,27 @@ class Person {
         return card_container
     }
 
-    // return a document element with corresponding branch number as the css order value
-    get_branch(branch_number) {
-      
+    // return a js object holding a branch and leaves as properties
+    create_branch(branch_number) {
+        
+        var branch_object = {
+            branch: undefined,
+            leaves: []
+        };
+
         var all_branches = document.getElementsByClassName('branch');
 
         // search for existing branch with this order number
         for( let existing_branch of all_branches) {
             
             if(existing_branch.style.order == branch_number) {
-                return existing_branch
+                branch_object.branch = existing_branch;
+
+                for ( let leaf of existing_branch.children ) {
+                    branch_object.leaves.push(leaf);
+                }
+
+                return branch_object
             }
         }
 
@@ -150,8 +162,43 @@ class Person {
         var branch_container = document.createElement('div');
         branch_container.className = 'branch';
         branch_container.style.order = branch_number;
+        
+       
+
+        // create leaves
+        if( branch_number > 2 ) {
+            // this is exponential based on value above branch 2
+            // number 2 to the power of the branch numberish
+            var leaf_count = Math.pow( 2 , (branch_number - 2) );
+
+            var flex_basis = 100 / leaf_count;
+
+            // make the leaves and add them to the branch
+            for( let leaf = 0; leaf < leaf_count; leaf++ ) {
+                var new_leaf = document.createElement('div');
+                new_leaf.className = 'leaf';
+                new_leaf.style.flexBasis = flex_basis + '%';
+                new_leaf.style.justifyContent = 'space-around';
+                branch_container.appendChild(new_leaf);
+                branch_object.leaves.push(new_leaf);
+            }
+        } else {
+            var only_leaf = document.createElement('div');
+            only_leaf.className = 'leaf';
+            if( branch_number == 2 ) {
+                only_leaf.style.flexBasis = '100%';
+                only_leaf.style.justifyContent = 'space-around';
+            }
+            branch_container.appendChild(only_leaf);
+            branch_object.leaves.push(only_leaf);
+        }
+
+
         tree_container.appendChild(branch_container);
-        return branch_container;
+        
+        branch_object.branch = branch_container;
+
+        return branch_object;
 
     }
 
@@ -169,10 +216,11 @@ class Person {
 
         var delete_icon = document.createElement('div');
         delete_icon.className = 'delete_sibling';
-        delete_icon.id = this.id;
         delete_icon.innerText = 'X';
         delete_icon.addEventListener('click', function() { 
-            delete_person(this.id);
+            var parent = this.parentElement;
+            console.log(parent, parent.id);
+            delete_person(parent.id);
         });
 
         
@@ -232,7 +280,8 @@ function delete_person(id) {
         var persons_element = document.getElementById(id);
         persons_element.remove();
 
-        // build json to send 
+
+        // build json to send POST
         var person_id = {}
         person_id.id = id;
        
@@ -553,6 +602,7 @@ function update_tree() {
 // builds html elements and assigns css order values to organize visuals
 function build_tree(selected_person) {
 
+    console.log(PERSON_ARRAY);
     // empty buffer
     let person_buffer = []; 
 
@@ -570,10 +620,15 @@ function build_tree(selected_person) {
         let person_to_build = person_buffer[0];
 
         // make the card and possibly the branch. append card to branch
-        let their_branch = person_to_build.get_branch(person_to_build.branchLevel);
+        let branch_object = person_to_build.create_branch(person_to_build.branchLevel);
         let their_card = person_to_build.create_card();
+
+        // theres a leaf present to place them in
+        // divide by 2 and round to get the leaf number/ index
+        let their_leaf_number = Math.round(person_to_build.cardNumber / 2);
+        branch_object.leaves[their_leaf_number - 1].appendChild(their_card);
         their_card.style.order = person_to_build.cardNumber;
-        their_branch.appendChild(their_card);
+        
 
         // loop their siblings and add them to the sibling div
         for( let sibling of person_to_build.siblings ) {
@@ -584,16 +639,13 @@ function build_tree(selected_person) {
         }
 
         // loop through their parents and set their branchLevel & cardNumber, and add them to the buffer
-        for( let parent of person_to_build.parents ) {
+        for( let n = 0; n < person_to_build.parents.length; n++ ) {
+            let parent = person_to_build.parents[n];
+            
             parent.branchLevel = person_to_build.branchLevel + 1;
             
-            if( person_to_build.parentCardSet == false ) {
-                parent.cardNumber = (person_to_build.cardNumber * 2) - 1;
-                person_to_build.parentCardSet = true;
-            } else {
-                parent.cardNumber = person_to_build.cardNumber * 2;
-            }
-
+            parent.cardNumber = (person_to_build.cardNumber * 2) - parent.gender;
+            
             person_buffer.push(parent);
         }
 
@@ -666,7 +718,7 @@ function get_person_list() {
 
             PERSON_ARRAY.push(person_instance);
         } );
-
+        
         get_relation_list();
         
     } ;
@@ -687,9 +739,14 @@ function get_relation_list() {
         RELATION_ARRAY.forEach(create_relationship);
 
         if(PERSON_ARRAY.length > 0) {
-            PERSON_ARRAY[0].assignedRoot = true;
-
-            build_tree(PERSON_ARRAY[0]);
+            // we can probably traverse relationships and build tree from that
+            for( let person of PERSON_ARRAY) {
+                if(person.id == 46) {
+                    person.assignedRoot = true;
+                    build_tree(person);
+                }
+            }
+            
         }
         
         
