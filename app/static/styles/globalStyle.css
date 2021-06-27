@@ -14,27 +14,129 @@
 }
 
 body {
-    font-size: 15px;
+    font-size: 25px;
     font-family: 'Poppins', sans-serif;
     background-color: var(--veryLightGray);
+    margin: 0;
+    min-height: 100vh;
 }
 
 .button {
     width: 100px;
     height: auto;
+}
+.card {
+    border-radius: 5px;
+    box-shadow: 0px 30px 40px -20px var(--grayishBlue);
+    padding: 15px 30px;
+    margin: 20px;
+    max-width: 300px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+.delete_sibling {
+    color: hsl(0deg 78% 62%);
+    font-weight: 300;
+    font-family: Arial, sans-serif;
+    height: 20px;
+    width: 20px;
+    float: right;
+    font-size: small;
+    cursor: pointer;
+    user-select: none;
+}
+.delete_cardholder {
+    color: hsl(0deg 78% 62%);
+    font-weight: 300;
+    font-family: Arial, sans-serif;
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    font-size: small;
+    cursor: pointer;
+    user-select: none;
+}
+.person_div {
+    flex-grow: 3;
 
 }
-
-.person {
-    /* custom stuff maybe */
-
-
+.sibling_div {
+    flex-grow: 1;
+    display: flex;
+}
+.sibling_icon {
+    width: -webkit-fill-available;
+    background-color: #bbbbbb57;
+    border-radius: 5px;
+    font-size: medium;
+    padding: 5px;
+    margin: auto;
 }
 
 #tree_container {
     display: flex;
-    flex-direction: column-reverse;
+    /* flex-direction: column-reverse; */
+    flex-wrap: wrap-reverse;
+    justify-content: center;
 }
+
+#create_person_container {
+    display: flex;
+    position: fixed;
+    top: 0px;
+    width: 100vw;
+    height: 100vh;
+    align-content: center;
+    justify-content: center;
+    font-size: auto;
+
+}
+
+#create_person_form {
+    background-color: white;
+    padding: 20px;
+}
+
+#close_form_button {
+    color: hsl(0deg 78% 62%);
+    font-weight: 300;
+    font-family: Arial, sans-serif;
+    height: 20px;
+    width: 20px;
+
+}
+
+.input_div {
+    padding: 11.5px 15px;
+}
+.input_label {
+    color: var(--varyDarkBlue);
+    font-size: 20px;
+}
+.text_input {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    height: 40px;
+    font-size: 20px;
+    color: var(--varyDarkBlue);
+}
+.radio_div {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+}
+.radio_input {
+
+}
+.date_input {
+
+}
+
 
 .branch {
     display: flex;
@@ -74,17 +176,9 @@ h1:last-of-type {
     color: var(--grayishBlue);
 }
 
-/* paragraph text inside box */
-.box p {
+/* paragraph text inside card */
+.card p {
     color: var(--grayishBlue);
-}
-
-.box {
-    border-radius: 5px;
-    box-shadow: 0px 30px 40px -20px var(--grayishBlue);
-    padding: 30px;
-    margin: 20px;
-    max-width: 300px;
 }
 
 img {
@@ -93,20 +187,20 @@ img {
 
 /*  450 or less */
 @media (max-width: 450px) {
-    .box {
+    .card {
         height: 60px;
     }
 }
 
 /* between 950 and 450 */
 @media (max-width: 950px) and (min-width: 450px) {
-    .box {
+    .card {
         text-align: center;
         height: 80px;
     }
 }
 
-/* top box border colors ? */
+/* top card border colors ? */
 .cyan {
     border-top: 3px solid var(--cyan);
 }
@@ -132,7 +226,7 @@ h2 {
 /* greater than 950 */
 @media (min-width: 950px) {
 
-    .box {
+    .card {
         width: 20%;
      
     }

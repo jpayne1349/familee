@@ -1,14 +1,11 @@
-// TODO: add ability to assign a relationship within create person
-    // includes either another ajax call, or rewriting the existing
-    // or no.. just include more info in the json request for create_person. 
-    // to be deciphered on python end.
-    // whether or not to call relation_table() etc...
+// TODO: 
+    // want to add a different branch approach. each row could have multiple branches?
+    // branches above 2 have at least 4 people. need to organize those 4 people better.
+
+    //
 
     // next display people who arent in the tree
     // add a way to modify their profile
-
-    // add DELETE person ability, maybe within their profile view.
-
 
 
 
@@ -34,6 +31,14 @@ class Person {
 
     constructor(javascript_object = {}) {
         Object.assign(this, javascript_object); // this is a neat way of converting the js object properties to 'this'
+        // list of js properties assigned
+        // this.id,
+        // this.givenName,
+        // this.familyName,
+        // this.dateOfBirth,
+        // this.dateOfDeath,
+        // this.details,
+        // this.gender,
         this.siblings = [];
         this.children = [];
         this.parents = [];
@@ -43,8 +48,11 @@ class Person {
         this.branchLevel;
         this.cardNumber;
         this.parentCardSet = false;
-        this.hasIcon = false;
-        this.iconHolder;
+        this.hasCard = false;
+        this.cardHolder;
+        this.assignedRoot = false;
+        this.sibling_div;
+
     }
 
     // class methods for most things, remember to use 'this'
@@ -61,38 +69,68 @@ class Person {
     add_partner(selected_person) {
         this.partners.push(selected_person);
     }
-
-    // returns an html element to be used as a linker to the person's data
-    // 
-    get_card(displayType) {
-        
-        if(this.hasIcon == true) {
-            return this.iconHolder;
+    remove_relationship(selected_person) {
+        if(this.parents.includes(selected_person)) {
+            let n = this.parents.indexOf(selected_person);
+            this.parents.splice(n, 1);
         }
-        var container = document.createElement('div');
-        container.id = this.id;
-        container.className = 'person';
-        container.innerText = this.givenName;
-        this.hasIcon = true;
-        this.iconHolder = container; // store the newly created element with the person
+        if(this.children.includes(selected_person)) {
+            let n = this.children.indexOf(selected_person);
+            this.children.splice(n, 1);
+        }
+        if(this.siblings.includes(selected_person)) {
+            let n = this.siblings.indexOf(selected_person);
+            this.siblings.splice(n, 1);
+        }
+        if(this.partners.includes(selected_person)) {
+            let n = this.partners.indexOf(selected_person);
+            this.partners.splice(n, 1);
+        }
+    }
+
+    // used for deletion of this Person instance and associated relationships
+    
+    // returns an html element to be used as a linker to the person's data
+    create_card() {
+        
+        if(this.hasCard == true) {
+            return this.cardHolder;
+        }
+        var card_container = document.createElement('div');
+        card_container.className = 'card';
+        this.hasCard = true;
+        this.cardHolder = card_container; // store the newly created element with the person
+
+        var delete_div = document.createElement('div');
+        delete_div.className = 'delete_cardholder';
+        delete_div.innerText = 'X';
+        delete_div.id = this.id;
+        delete_div.addEventListener('click', function() {
+            delete_person(this.id);
+        });
+
+        var person_div = document.createElement('div');
+        person_div.id = this.id;
+        person_div.className = 'person_div';
+        person_div.innerText = this.givenName;
+
+        var sibling_div = document.createElement('div');
+        sibling_div.className = 'sibling_div';
+        this.sibling_div = sibling_div;
+
+        card_container.append(delete_div, person_div, sibling_div);
 
         // assign a border color or gender
-        if(this.gender == 'male') {
-            container.classList.add('blue');
-        } else if (this.gender == 'female') {
-            container.classList.add('pink');
+        
+        if(this.gender == 1) {
+            card_container.classList.add('blue');
+        } else if (this.gender == 0) {
+            card_container.classList.add('pink');
         } else {
-            container.classList.add('orange');
+            card_container.classList.add('orange');
         }
         
-        // specify if a circle or box
-        if( displayType == 'box' ) {
-            container.classList.add('box');
-        } else {
-            container.classList.add('circle');
-        }
-        
-        return container
+        return card_container
     }
 
     // return a document element with corresponding branch number as the css order value
@@ -117,26 +155,130 @@ class Person {
 
     }
 
+    // returns a sibling icon element, to be used when adding sibling to a card
+    sibling_icon() {
+        // search if existing first
+        if(this.hasCard == true) {
+            // point to existing
+            return this.cardHolder
+        }
+
+        var sibling_icon = document.createElement('div');
+        sibling_icon.className = 'sibling_icon';
+        sibling_icon.id = this.id;
+
+        var delete_icon = document.createElement('div');
+        delete_icon.className = 'delete_sibling';
+        delete_icon.id = this.id;
+        delete_icon.innerText = 'X';
+        delete_icon.addEventListener('click', function() { 
+            delete_person(this.id);
+        });
+
+        
+
+        var initials_array = [];
+        var names_array = this.givenName.split(' ');
+        names_array.forEach(function(word) {
+            var first_letter = word.slice(0,1);
+            initials_array.push(first_letter);
+        });
+        var join_string = initials_array.join('.');
+        var last_period = '.';
+        var initials = join_string.concat(last_period);
+        
+        sibling_icon.innerText = initials;
+
+        sibling_icon.appendChild(delete_icon);
+        
+        return sibling_icon
+    }
 }
 
+// to delete this person from all javascript and post AJAX to remove from db
+function delete_person(id) {
+        
+        let person_object = person_from_id(id);
+
+        // removal from relation array
+        for( let entry of RELATION_ARRAY) {
+            if( entry.person_a_id == id) {
+                // person b must be sifted
+
+                let relative = person_from_id(entry.person_b_id);
+                relative.remove_relationship(person_object);
+
+                let index = RELATION_ARRAY.indexOf(entry);
+                RELATION_ARRAY.splice(index, 1);
+            } else if ( entry.person_b_id == id ) {
+
+                let relative = person_from_id(entry.person_a_id);
+                relative.remove_relationship(person_object);
+
+                let index = RELATION_ARRAY.indexOf(entry);
+                RELATION_ARRAY.splice(index, 1);
+            }
+        }
+    
+        // removal from PERSON_ARRAY
+        for( let person of PERSON_ARRAY) {
+            if( person.id == id) {
+                let index = PERSON_ARRAY.indexOf(person);
+                PERSON_ARRAY.splice(index, 1);
+            }
+        }
+        
+        // remove html element
+        var persons_element = document.getElementById(id);
+        persons_element.remove();
+
+        // build json to send 
+        var person_id = {}
+        person_id.id = id;
+       
+        var json_string = JSON.stringify(person_id);
+
+        var ajax_request = new XMLHttpRequest();
+        ajax_request.open("POST", "/delete_person");
+        ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
+        ajax_request.send(json_string);
+        ajax_request.onload = function() {
+            // all javascript should be updated.
+            // reload
+            update_tree();
+        };
+
+    }
 
 // call when needing to add a person to the database
-// rough for the first iteration
 function create_new_person() {
     // perform a check to see if this form is already available?
 
-
-
     // maybe we just have a popup for now. just something quick
     let container = document.createElement('div');
+    container.id = 'create_person_container';
+
     let form_holder = document.createElement('form');
     form_holder.name = 'create_person';
     form_holder.setAttribute('onsubmit', 'event.preventDefault();');
-    let form_title = document.createElement('div');
+    form_holder.id = 'create_person_form';
+
+    let close_form_button = document.createElement('button');
+    close_form_button.id = 'close_form_button';
+    close_form_button.addEventListener('click', function(){ container.remove(); });
+    close_form_button.innerText = 'X';
+    form_holder.appendChild(close_form_button);
+    
+    let form_title = document.createElement('h1');
+    form_title.innerText = 'Create a New Person';
+    form_holder.appendChild(form_title);
     
 
     let gName_div = document.createElement('div');
+    gName_div.className = 'input_div';
     let gName_input = document.createElement('input');
+    gName_input.className = 'text_input';
+    gName_input.autofocus = true;
     gName_input.type = 'text';
     gName_input.autocomplete = 'off';
     gName_input.placeholder = 'Given Name - required';
@@ -144,7 +286,9 @@ function create_new_person() {
     form_holder.appendChild(gName_div);
     
     let fName_div = document.createElement('div');
+    fName_div.className = 'input_div';
     let fName_input = document.createElement('input');
+    fName_input.className = 'text_input';
     fName_input.type = 'text';
     fName_input.autocomplete = 'off';
     fName_input.placeholder = 'Family Name';
@@ -152,8 +296,11 @@ function create_new_person() {
     form_holder.appendChild(fName_div);
 
     let gender_div = document.createElement('div');
+    gender_div.className = 'input_div radio_div';
     let gender_male = document.createElement('input');
+    gender_male.className = 'radio_input';
     let male_label = document.createElement('label');
+    male_label.className = 'input_label';
     gender_male.id = 'male_radio';
     gender_male.value = 1;
     male_label.for = 'male_radio';
@@ -161,7 +308,9 @@ function create_new_person() {
     gender_male.type = 'checkbox';
 
     let gender_female = document.createElement('input');
+    gender_female.className = 'radio_input';
     let female_label = document.createElement('label');
+    female_label.className = 'input_label';
     gender_female.id = 'female_radio';
     gender_female.value = 0;
     female_label.for = 'female_radio';
@@ -172,44 +321,102 @@ function create_new_person() {
     form_holder.appendChild(gender_div);
 
     let dob_div = document.createElement('div');
+    dob_div.className = 'input_div';
+    let dob_label = document.createElement('label');
+    dob_label.className = 'input_label';
+    dob_label.innerText = 'Date of Birth';
     let date_of_birth = document.createElement('input');
+    date_of_birth.className = 'date_input';
     date_of_birth.type = 'date';
     date_of_birth.autocomplete = 'off';
     date_of_birth.placeholder = 'Date of Birth';
-    dob_div.appendChild(date_of_birth);
+    dob_div.append(date_of_birth, dob_label);
     form_holder.appendChild(dob_div);
 
     let dod_div = document.createElement('div');
+    dod_div.className = 'input_div';
+    let dod_label = document.createElement('label');
+    dod_label.className = 'input_label';
+    dod_label.innerText = 'Date of Death';
     let date_of_death = document.createElement('input');
+    date_of_death.className = 'date_input';
     date_of_death.type = 'date';
     date_of_death.autocomplete = 'off';
     date_of_death.placeholder = 'Date of Death';
-    dod_div.appendChild(date_of_death);
+    dod_div.append(date_of_death, dod_label);
     form_holder.appendChild(dod_div);
 
     let details_div = document.createElement('div');
+    details_div.className = 'input_div';
     let details = document.createElement('input');
+    details.className = 'text_input';
     details.type = 'text';
     details.autocomplete = 'off';
     details.placeholder = 'Details';
     details_div.appendChild(details);
     form_holder.appendChild(details_div);
 
+    if( PERSON_ARRAY.length > 0) {
+        let relation_div = document.createElement('div');
+        relation_div.className = 'input_div';
+        let relation_type_label = document.createElement('label');
+        relation_type_label.className = 'input_label';
+        relation_type_label.innerText = 'This is a ';
+        let relation_type_select = document.createElement('select');
+        relation_type_select.className = 'select_input';
+        relation_type_select.id = 'relation_type_select';
+        let parent_option = document.createElement('option');
+        parent_option.innerText = 'Parent';
+        parent_option.className = 'option_input';
+        parent_option.value = 'a';
+        let sibling_option = document.createElement('option');
+        sibling_option.innerText = 'Sibling';
+        sibling_option.className = 'option_input';
+        sibling_option.value = 'c';
+        let child_option = document.createElement('option');
+        child_option.innerText = 'Child';
+        child_option.className = 'option_input';
+        child_option.value = 'b';
+        relation_type_select.append(parent_option, sibling_option, child_option);
+        let of_label = document.createElement('label');
+        of_label.className = 'input_label';
+        of_label.innerText = ' of ';
+        let person_select = document.createElement('select');
+        person_select.className = 'select_input';
+        person_select.id = 'person_select';
+        //build options in a loop based on the people availables
+        for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
+            let person = PERSON_ARRAY[i];
+            let new_option = document.createElement('option');
+            new_option.value = person.id;
+            new_option.innerText = person.givenName;
+            new_option.className = 'option_input';
+            person_select.appendChild(new_option);
+        }
+        relation_div.append(relation_type_label, relation_type_select, of_label, person_select);
+        form_holder.append(relation_div);
+    
+    } else { // this is the first created person
+        let relation_div = document.createElement('div');
+        relation_div.className = 'input_div';
+        let relation_type_label = document.createElement('label');
+        relation_type_label.className = 'input_label';
+        relation_type_label.innerText = 'This person will be automatically assigned as the ROOT of the tree';
+        relation_div.append(relation_type_label);
+        form_holder.append(relation_div);
+    }
+
     let create_div = document.createElement('div');
+    create_div.className = 'create_div';
     let create_button = document.createElement('button');
+    create_button.className = 'create_button';
     create_button.innerText = 'Create';
     create_div.appendChild(create_button);
     form_holder.appendChild(create_div);
     create_button.addEventListener('click', validate_and_post);
 
 
-
-    // all these are put in the container and the container added to the screen
-    // obviously they need names and what not
-    
-    
     container.appendChild(form_holder);
-
     page.appendChild(container);
 
 
@@ -218,46 +425,72 @@ function create_new_person() {
         if(checkRequiredFields()) {
             
 
-            // and we create the person object in javascript here.
-            // assuming that the database operation happens correctly
-            // maybe we do the database entry, and then on the response we create the javascript Person
             let new_person_object = {};
             new_person_object.givenName = gName_input.value;
             new_person_object.familyName = fName_input.value;
-            new_person_object.dateOfBirth = date_of_birth.value;
-            new_person_object.dateOfDeath = date_of_death.value;
+            new_person_object.dateOfBirth = myDateFormat(date_of_birth.value);
+            console.log(date_of_birth.value);
+            new_person_object.dateOfDeath = myDateFormat(date_of_death.value);
             new_person_object.details = details.value;
             if(gender_male.checked == true) {
                 new_person_object.gender = 1;
             } else {
                 new_person_object.gender = 0;
             }
-            
-            let json_string = JSON.stringify(new_person_object);
 
-            console.log(new_person_object);
+            if(PERSON_ARRAY.length > 0) {
+                let relation_select = document.getElementById('relation_type_select')
+                console.log(relation_select);
+                let person_selected = document.getElementById('person_select');
+                switch(relation_select.value) {
+                    case 'a': // the new person is the parent
+                        new_person_object.relation_type = 0;
+                        new_person_object.person_a_id = true;
+                        new_person_object.relation_id = person_selected.value;
+                        break;
+                    case 'b': // the new person is the child
+                        new_person_object.relation_type = 0;
+                        new_person_object.person_a_id = false;
+                        new_person_object.relation_id = person_selected.value;
+                        break;
+                    case 'c': // the persons are siblings, doesn't matter
+                        new_person_object.relation_type = 1;
+                        new_person_object.person_a_id = true;
+                        new_person_object.relation_id = person_selected.value;
+                        break;
+                }
+
+            }
+
+
+            let json_string = JSON.stringify(new_person_object);
 
             // post section
             var ajax_request = new XMLHttpRequest();
-            ajax_request.onload = function() {
-                var json_string = this.response;
-                js_array = JSON.parse(json_string);
-        
-                js_array.forEach( function(json_object) {
-                    var person_instance = new Person(json_object);
-
-                    PERSON_ARRAY.push(person_instance);
-                } );
-
-                // next up is the addition of relationship, on create person maybe.
-                
-            };
-
-            
-
             ajax_request.open("POST", "/create_person");
             ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
             ajax_request.send(json_string);
+            // this is from the response
+            ajax_request.onload = function() { 
+                javascript_array = JSON.parse(this.response);
+                console.log('person added response', javascript_array);
+                // in this response only, index 0 is the person, and 1 is the relation
+                var person_instance = new Person(javascript_array[0]);
+                if(PERSON_ARRAY.length == 0) {
+                    person_instance.assignedRoot = true;
+                }
+                PERSON_ARRAY.push(person_instance);
+                if(PERSON_ARRAY.length > 1) {
+                    RELATION_ARRAY.push(javascript_array[1]);
+                    create_relationship(javascript_array[1]);
+                }
+
+                // this should leave us in a state where both global arrays are updated
+                update_tree();
+                
+                container.remove();
+                
+            };
 
             return false
         
@@ -268,7 +501,6 @@ function create_new_person() {
             console.log(gName_input.value);
             console.log(gender_male.checked);
             console.log(gender_female.checked);
-
 
             if(!gName_input.value) {
                 // set givenName outline to red
@@ -294,6 +526,27 @@ function create_new_person() {
         
     }
 
+    function myDateFormat(js_date) {
+        let new_date = js_date.replace(/-/g, '');
+        return new_date
+    }
+}
+
+// this should eventually just append something to the tree. right now, to complicated to see
+// for now, this will delete tree and rebuild
+function update_tree() {
+    // crude way of finding root right now. as there is no way to change the root yet
+    // remove all branches
+    let branches = document.getElementsByClassName('branch');
+    for(let branch of branches) {
+        branch.remove();
+    }
+    // find person with assignedRoot value and pass to build tree
+    for( let person of PERSON_ARRAY) {
+        if(person.assignedRoot) {
+            build_tree(person);
+        }
+    }
 }
 
 // being called after all database info has been loaded. 
@@ -318,14 +571,16 @@ function build_tree(selected_person) {
 
         // make the card and possibly the branch. append card to branch
         let their_branch = person_to_build.get_branch(person_to_build.branchLevel);
-        let their_card = person_to_build.get_card('box');
+        let their_card = person_to_build.create_card();
         their_card.style.order = person_to_build.cardNumber;
         their_branch.appendChild(their_card);
 
-        // loop their siblings and add them
+        // loop their siblings and add them to the sibling div
         for( let sibling of person_to_build.siblings ) {
-            let sib_card = sibling.get_card('circle');
-            their_card.appendChild(sib_card);
+            let sib_icon = sibling.sibling_icon();
+            person_to_build.sibling_div.appendChild(sib_icon);
+            sibling.hasCard = true;
+            sibling.cardHolder = sib_icon;
         }
 
         // loop through their parents and set their branchLevel & cardNumber, and add them to the buffer
@@ -350,6 +605,7 @@ function build_tree(selected_person) {
     
 
 }
+
 
 // used to update the current properties of people in a relation entry
 function create_relationship(relation_entry_object) {
@@ -381,8 +637,6 @@ function create_relationship(relation_entry_object) {
         default:
             throw "Relation Type Out of Bounds";
     }
-    console.log('relationship created');
-    console.log(PERSON_ARRAY);
 }
     
 // loops the person array and returns the person object
@@ -395,6 +649,8 @@ function person_from_id(id) {
         }
     }
 }
+
+// TODO: technically, we could combine person and relation fetch at load. [[person_list][relation_list]]
 
 // AJAX call to get all persons in database // also updates global array right now
 function get_person_list() {
@@ -428,10 +684,15 @@ function get_relation_list() {
     ajax_request.onload = function() {
         //replaces current array...
         RELATION_ARRAY = JSON.parse(this.response);
-        
         RELATION_ARRAY.forEach(create_relationship);
 
-        build_tree(PERSON_ARRAY[0]);
+        if(PERSON_ARRAY.length > 0) {
+            PERSON_ARRAY[0].assignedRoot = true;
+
+            build_tree(PERSON_ARRAY[0]);
+        }
+        
+        
 
     } ;
     ajax_request.open("POST", "/database_relation_all");

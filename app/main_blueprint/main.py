@@ -32,25 +32,66 @@ def pull_all_relation():
 @main_blueprint.route('/create_person', methods=['POST'])
 def create_person():
     
+    # this converts the json to a python dict
     person = request.json
-    
-    print(person)
-    print(type(person))
-    # TODO: check for same given name in db
-    # notify user before duplicate entry
-    # maybe doesnt matter if other information can identify
-    
 
     new_person = Person(givenName = person["givenName"], familyName = person["familyName"], dateOfBirth=person["dateOfBirth"], dateOfDeath=person["dateOfDeath"], details=person["details"], gender=person["gender"])
 
     db.session.add(new_person)
     db.session.commit()
 
-    # new_person now should have an id..
-    json_person = personObjectsToJson([new_person])
+    print(person)
 
-    return json_person
-  
+    if "relation_type" in person:
+        # new_person now should have an id..
+        # for now, we assume the relation keys will be there as well
+        person_a = 0
+        person_b = 0
+        # determine which person should be a and b
+        if(person["person_a_id"] == True):
+            person_a = new_person.id
+            person_b = person["relation_id"]
+        else:
+            person_a = person["relation_id"]
+            person_b = new_person.id
+        
+        new_relation = relation_table(relation_type=person["relation_type"], person_a_id=person_a, person_b_id=person_b)
+        db.session.add(new_relation)
+        db.session.commit()
+
+        json_response = personAndRelationToJson(new_person, new_relation)
+        
+        return json_response
+
+    # if no relation was included
+    json_response = personObjectsToJson([new_person])
+    
+    return json_response
+
+
+@main_blueprint.route('/delete_person', methods=['POST'])
+def delete_person():
+    # this converts the json to a python dict
+    person_id = request.json
+    id_string = person_id["id"]
+    id_number = int(id_string)
+
+    person_a_relations = relation_table.query.filter_by(person_a_id = id_number).all()
+    for relation_a in person_a_relations:
+        db.session.delete(relation_a)
+    db.session.commit()
+
+    person_b_relations = relation_table.query.filter_by(person_b_id=id_number).all()
+    for relation_b in person_b_relations:
+        db.session.delete(relation_b)
+    db.session.commit()
+
+    this_person = Person.query.filter_by(id=id_number).first()
+    db.session.delete(this_person)
+    db.session.commit()
+
+    return 'deleted'
+
 # turns the database objects into a python dictionary, which can be converted to JSON
 # TODO: manual input of the attributes was required. Maybe it's not neccessary? the properties of an object can be collected in a loop? 
 def personObjectsToJson(person_list):
@@ -86,6 +127,29 @@ def relationObjectsToJson(relation_list):
 
 
         dict_list.append(relation_dict)
+
+    jsonList = json.dumps(dict_list)
+    return jsonList
+def personAndRelationToJson(person, relation):
+    dict_list = []
+    
+    person_dict = {}
+    person_dict["id"] = person.id
+    person_dict["givenName"] = person.givenName
+    person_dict["familyName"] = person.familyName
+    person_dict["dateOfBirth"] = person.dateOfBirth
+    person_dict["dateOfDeath"] = person.dateOfDeath
+    person_dict["details"] = person.details
+    person_dict["gender"] = person.gender
+
+    dict_list.append(person_dict)
+
+    relation_dict = {}
+    relation_dict["relation_type"] = relation.relation_type
+    relation_dict["person_a_id"] = relation.person_a_id
+    relation_dict["person_b_id"] = relation.person_b_id
+
+    dict_list.append(relation_dict)
 
     jsonList = json.dumps(dict_list)
     return jsonList
