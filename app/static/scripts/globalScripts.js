@@ -1,10 +1,23 @@
 // TODO: 
-    // 
+    // i like the idea of wide cards in desktop and tall cards in mobile.
+    //
+    // i also think it would be necessary to allow movement within the tree container.
+    // so you can keep the cards large enough to see
+    //
+    // also like the idea of adding memories to the person object. like time period, and description. maybe a picture.
+    //
+    // probably could make a profile photo type placeholder. where your initials get placed in if
+    // you don't have a profile photo set yet.
+    //
     //
     
+
+    // what happens when you delete the root?
+    // fix the root selection, or allow the user to do it.
+
     //
 
-    // next display people who arent in the tree
+    // 
     // add a way to modify their profile
 
 
@@ -47,7 +60,6 @@ class Person {
 
         this.branchLevel;
         this.cardNumber;
-        this.parentCardSet = false;
         this.hasCard = false;
         this.cardHolder;
         this.assignedRoot = false;
@@ -98,20 +110,56 @@ class Person {
         }
         var card_container = document.createElement('div');
         card_container.className = 'card';
+        card_container.id = this.id;
         this.hasCard = true;
         this.cardHolder = card_container; // store the newly created element with the person
+
+        var profile_icon = document.createElement('img');
+        profile_icon.className = 'profile_icon';
+        profile_icon.src = 'static/profile_icon.png';
+        profile_icon.addEventListener('click', function() {
+            // pull up an editing view for the person?
+
+        });
+
+        var person_options = document.createElement('div');
+        person_options.className = 'person_options';
+        person_options.innerText = 'test';
+
+        var dot_menu = document.createElement('div');
+        dot_menu.className = 'dot_menu';
+        dot_menu.addEventListener('click', function() {
+            // toggle person_options
+            if( person_options.style.display == 'none') {
+                person_options.style.display = 'block';
+                person_options.style.opacity = '1';
+            } else {
+                person_options.style.display = 'none';
+                person_options.style.opacity = '0';
+            }
+        });
+
+        var dot1 = document.createElement('div');
+        dot1.className = 'dot';
+        var dot2 = document.createElement('div');
+        dot2.className = 'dot';
+        var dot3 = document.createElement('div');
+        dot3.className = 'dot';
+
+        dot_menu.append(dot1,dot2,dot3);
 
         var delete_div = document.createElement('div');
         delete_div.className = 'delete_cardholder';
         delete_div.innerText = 'X';
 
         delete_div.addEventListener('click', function() {
-            var owner = delete_div.nextSibling;
+            var owner = delete_div.parentElement;
+
             delete_person(owner.id);
         });
 
         var person_div = document.createElement('div');
-        person_div.id = this.id;
+        //person_div.id = this.id;
         person_div.className = 'person_div';
         person_div.innerText = this.givenName;
 
@@ -119,7 +167,7 @@ class Person {
         sibling_div.className = 'sibling_div';
         this.sibling_div = sibling_div;
 
-        card_container.append(delete_div, person_div, sibling_div);
+        card_container.append(profile_icon, dot_menu, person_options, person_div, sibling_div);
 
         // assign a border color or gender
         
@@ -132,6 +180,7 @@ class Person {
         }
         
         return card_container
+
     }
 
     // return a js object holding a branch and leaves as properties
@@ -219,7 +268,7 @@ class Person {
         delete_icon.innerText = 'X';
         delete_icon.addEventListener('click', function() { 
             var parent = this.parentElement;
-            console.log(parent, parent.id);
+            parent.remove();
             delete_person(parent.id);
         });
 
@@ -276,9 +325,9 @@ function delete_person(id) {
             }
         }
         
-        // remove html element
-        var persons_element = document.getElementById(id);
-        persons_element.remove();
+        // remove html element - changed to be done in onclick function
+        //var persons_element = document.getElementById(id);
+        //persons_element.remove();
 
 
         // build json to send POST
@@ -435,7 +484,12 @@ function create_new_person() {
         person_select.id = 'person_select';
         //build options in a loop based on the people availables
         for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
+            // refactor for only people with cards??
             let person = PERSON_ARRAY[i];
+            // filters out siblings. so you can't add blind relationships
+            if( person.cardHolder.className.includes('sibling_icon')) {
+                continue
+            }
             let new_option = document.createElement('option');
             new_option.value = person.id;
             new_option.innerText = person.givenName;
@@ -760,24 +814,27 @@ function get_relation_list() {
 }
 
 
-var page = document.body;
+var side_menu = document.getElementById('side_menu');
+side_menu.classList.add('one-edge-shadow');
 
-var button = document.createElement('button');
-button.addEventListener('click', create_new_person);
-button.className = 'button';
-button.innerText = 'create person';
-page.appendChild(button);
+var plus_icon = document.createElement('img');
+plus_icon.src = 'static/plus_icon.png';
+plus_icon.addEventListener('click', create_new_person);
+plus_icon.className = 'button';
+plus_icon.alt = 'create a new person';
+side_menu.appendChild(plus_icon);
 
 var button2 = document.createElement('button');
 //button2.addEventListener('click', get_relation_list);
 button2.className = 'button';
 button2.innerText = 'test button';
-page.appendChild(button2);
+side_menu.appendChild(button2);
 
-var button3 = document.createElement('button');
-//button3.addEventListener('click', function() { RELATION_ARRAY.forEach(create_relationship); });
-button3.className = 'button';
-button3.innerText = 'test button';
-page.appendChild(button3);
+var settings_icon = document.createElement('img');
+settings_icon.src = 'static/settings_icon.svg';
+settings_icon.className = 'button';
+settings_icon.id = 'settings';
+
+side_menu.appendChild(settings_icon);
 
 

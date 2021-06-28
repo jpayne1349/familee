@@ -1,3 +1,6 @@
+*, *::before, *::after { 
+    box-sizing: border-box; 
+}
 
 :root {
     --red: hsl(0, 78%, 62%);
@@ -19,16 +22,44 @@ body {
     background-color: var(--veryLightGray);
     margin: 0;
     min-height: 100vh;
+    display:flex;
+}
+
+#tree_container {
+    display: flex;
+    flex-direction: column-reverse;
+        flex-grow: 2;
+}
+#side_menu{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    background-color: #001f3f;
+    padding: 10px;
+    align-items: center;
+}
+
+.one-edge-shadow {
+	-webkit-box-shadow: 0px 0px 15px -2px grey;
+	   -moz-box-shadow: 0px 0px 15px -2px grey;
+	        box-shadow: 0px 0px 15px -2px grey;
 }
 
 .button {
-    width: 100px;
+    width: 43px;
     height: auto;
+    cursor: pointer;
+    user-select: none;
 }
+#settings.button {
+    width: 32px;
+}
+
+
 .branch {
     display: flex;
     flex-direction: row;
-    border: 3px solid #333333;
+    /* border: 3px solid #333333; */
     justify-content: center;
 }
 .leaf {
@@ -46,6 +77,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     position: relative;
+    font-size: large;
 }
 .delete_sibling {
     color: hsl(0deg 78% 62%);
@@ -69,6 +101,43 @@ body {
     cursor: pointer;
     user-select: none;
 }
+.profile_icon {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    cursor: pointer;
+    user-select: none;
+    width: 15px;
+}
+.person_options {
+    display:none;
+    position: absolute;
+    right: -50px;
+    top: 3px;
+    cursor: pointer;
+    user-select: none;
+    background-color: bisque;
+    width: 50px;
+    height: 50px;
+
+}
+
+.dot_menu {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    cursor: pointer;
+    user-select: none;
+
+}
+.dot {
+    background-color: hsl(229, 6%, 66%);
+    width: 3px;
+    height: 3px;
+    margin: 2px;
+    border-radius: 50%;
+
+}
 .person_div {
     flex-grow: 3;
 
@@ -84,13 +153,7 @@ body {
     font-size: medium;
     padding: 5px;
     margin: auto;
-}
-
-#tree_container {
-    display: flex;
-    flex-direction: column-reverse;
-    /* flex-wrap: wrap-reverse;
-    justify-content: center; */
+    user-select: none;
 }
 
 #create_person_container {
@@ -162,24 +225,16 @@ h1:last-of-type {
 }
 
 /* 400 px or less */
-@media (max-width: 400px) {
-    h1 {
-        font-size: 1.5rem;
+@media (max-width: 450px) {
+    body {
+        flex-direction: column-reverse;
     }
+    #side_menu {
+        flex-direction: row-reverse;
+    }
+
 }
 
-.header {
-    text-align: center;
-    line-height: 0.8;
-    margin-bottom: 50px;
-    margin-top: 100px;
-}
-
-.header p {
-    margin: 0 auto;
-    line-height: 2;
-    color: var(--grayishBlue);
-}
 
 /* paragraph text inside card */
 .card p {
@@ -190,18 +245,10 @@ img {
     float: right;
 }
 
-/*  450 or less */
-@media (max-width: 450px) {
-    .card {
-        
-    }
-}
 
 /* between 950 and 450 */
 @media (max-width: 950px) and (min-width: 450px) {
-    .card {
-        
-    }
+
 }
 
 /* top card border colors ? */
