@@ -1,29 +1,5 @@
-// TODO: 
-    //BUGS: create person form does not act right in mobile.
-    //      bc of creation of div the first click
-    //
-    //
-    // i like the idea of wide cards in desktop and tall cards in mobile.
-    //
-    // i also think it would be necessary to allow movement within the tree container.
-    // so you can keep the cards large enough to see
-    //
-    // also like the idea of adding memories to the person object. like time period, and description. maybe a picture.
-    //
-    // probably could make a profile photo type placeholder. where your initials get placed in if
-    // you don't have a profile photo set yet.
-    //
-    //
-    // what happens when you delete a linking person. like a parent that also has parents above it.. etc
-    // what happens when you delete the root?
-    // fix the root selection, or allow the user to do it.
 
-    // make the delete from thing better. maybe just clear the form and display none. 
-
-    // 
-    // add a way to modify their profile
-
-
+// Moved our Feature and Bug List to Github Issues github.com/jpayne1349/familee/issues
 
 // global storage
 var PERSON_ARRAY = [];
