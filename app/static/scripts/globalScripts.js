@@ -1,4 +1,8 @@
 // TODO: 
+    //BUGS: create person form does not act right in mobile.
+    //      bc of creation of div the first click
+    //
+    //
     // i like the idea of wide cards in desktop and tall cards in mobile.
     //
     // i also think it would be necessary to allow movement within the tree container.
@@ -10,12 +14,11 @@
     // you don't have a profile photo set yet.
     //
     //
-    
-
+    // what happens when you delete a linking person. like a parent that also has parents above it.. etc
     // what happens when you delete the root?
     // fix the root selection, or allow the user to do it.
 
-    //
+    // make the delete from thing better. maybe just clear the form and display none. 
 
     // 
     // add a way to modify their profile
@@ -28,6 +31,9 @@ var PERSON_ARRAY = [];
 var RELATION_ARRAY = [];
 
 var tree_container = document.getElementById('tree_container');
+
+var body = document.body;
+
 
 // run on page load?
 function main() {
@@ -114,70 +120,66 @@ class Person {
         this.hasCard = true;
         this.cardHolder = card_container; // store the newly created element with the person
 
-        var profile_icon = document.createElement('img');
-        profile_icon.className = 'profile_icon';
-        profile_icon.src = 'static/profile_icon.png';
-        profile_icon.addEventListener('click', function() {
-            // pull up an editing view for the person?
-
-        });
-
-        var person_options = document.createElement('div');
-        person_options.className = 'person_options';
-        person_options.innerText = 'test';
-
-        var dot_menu = document.createElement('div');
-        dot_menu.className = 'dot_menu';
-        dot_menu.addEventListener('click', function() {
-            // toggle person_options
-            if( person_options.style.display == 'none') {
-                person_options.style.display = 'block';
-                person_options.style.opacity = '1';
-            } else {
-                person_options.style.display = 'none';
-                person_options.style.opacity = '0';
-            }
-        });
-
-        var dot1 = document.createElement('div');
-        dot1.className = 'dot';
-        var dot2 = document.createElement('div');
-        dot2.className = 'dot';
-        var dot3 = document.createElement('div');
-        dot3.className = 'dot';
-
-        dot_menu.append(dot1,dot2,dot3);
-
-        var delete_div = document.createElement('div');
-        delete_div.className = 'delete_cardholder';
-        delete_div.innerText = 'X';
-
-        delete_div.addEventListener('click', function() {
-            var owner = delete_div.parentElement;
-
-            delete_person(owner.id);
-        });
-
         var person_div = document.createElement('div');
-        //person_div.id = this.id;
         person_div.className = 'person_div';
-        person_div.innerText = this.givenName;
+        person_div.addEventListener('click', function() {
+            // get person and run their profile method.
+            let person_id = person_div.parentElement.id;
+            let person_obj = person_from_id(person_id);
+            
+            person_obj.profile();
+
+        });
+    
+        var card_photo = document.createElement('img');
+        card_photo.className = 'card_photo';
+        card_photo.src = 'static/profile_icon.png';
+
+        var card_name = document.createElement('div');
+        card_name.className = 'card_name';
+        card_name.innerText = this.givenName;
+
+        person_div.append(card_photo, card_name);
 
         var sibling_div = document.createElement('div');
         sibling_div.className = 'sibling_div';
+        sibling_div.innerText = 'Siblings';
         this.sibling_div = sibling_div;
-
-        card_container.append(profile_icon, dot_menu, person_options, person_div, sibling_div);
-
-        // assign a border color or gender
         
-        if(this.gender == 1) {
-            card_container.classList.add('blue');
-        } else if (this.gender == 0) {
-            card_container.classList.add('pink');
-        } else {
-            card_container.classList.add('orange');
-        }
+        // DEV ONLY: we can put the delete in the sibling just for testing
+        var delete_div = document.createElement('div');
+        delete_div.className = 'delete_cardholder';
+        delete_div.innerText = 'delete (dev only)';
+        // set an attribute to hold the person id
+        delete_div.setAttribute('var', this.id);
+        delete_div.addEventListener('click', function(event) {
+            
+            var owner_id = event.target.getAttribute('var');
+            
+            var cards = document.getElementsByClassName('card');
+            for( let card of cards ) {
+                if(card.id == owner_id) {
+                    card.remove();
+                }
+            }
+            delete_person(owner_id);
+        });
+        sibling_div.append(delete_div);
+
+        //show hide the sibling div on button press
+        var toggle_sibling_div = document.createElement('div');
+        toggle_sibling_div.className = 'toggle_sibling_div';
+        toggle_sibling_div.addEventListener('click', function() {
+            if(sibling_div.classList.contains('show')) {
+                sibling_div.classList.remove('show');
+                toggle_sibling_div.classList.remove('open');
+            } else {
+                sibling_div.classList.add('show');
+                toggle_sibling_div.classList.add('open');
+            }
+        });
+
+        card_container.append(toggle_sibling_div, person_div, sibling_div);
         
         return card_container
 
@@ -226,7 +228,8 @@ class Person {
             for( let leaf = 0; leaf < leaf_count; leaf++ ) {
                 var new_leaf = document.createElement('div');
                 new_leaf.className = 'leaf';
-                new_leaf.style.flexBasis = flex_basis + '%';
+                //new_leaf.style.flexBasis = flex_basis + '%';
+                new_leaf.style.width = '500px';
                 new_leaf.style.justifyContent = 'space-around';
                 branch_container.appendChild(new_leaf);
                 branch_object.leaves.push(new_leaf);
@@ -235,7 +238,7 @@ class Person {
             var only_leaf = document.createElement('div');
             only_leaf.className = 'leaf';
             if( branch_number == 2 ) {
-                only_leaf.style.flexBasis = '100%';
+                //only_leaf.style.flexBasis = '100%';
                 only_leaf.style.justifyContent = 'space-around';
             }
             branch_container.appendChild(only_leaf);
@@ -284,13 +287,163 @@ class Person {
         var last_period = '.';
         var initials = join_string.concat(last_period);
         
-        sibling_icon.innerText = initials;
+        //sibling_icon.innerText = initials;
 
-        sibling_icon.appendChild(delete_icon);
+        sibling_icon.innerText = this.givenName;
+        //sibling_icon.appendChild(delete_icon);
         
         return sibling_icon
     }
+
+    // show profile.. click out of the box should close?
+    profile() {
+
+        // document listener for closing profile div
+
+        var profile_div = document.createElement('div');
+        profile_div.className = 'profile_div';
+        profile_div.id = 'profile';
+
+        // TODO: profile photos a thing
+        var profile_photo = document.createElement('img');
+        profile_photo.className = 'profile_photo';
+        profile_photo.src = 'static/profile_icon.png';
+
+        var givenName_label = document.createElement('div');
+        givenName_label.className = 'profile_label';
+        givenName_label.innerText = 'Given/Birth Name';
+        // slide this up a bit for now
+        givenName_label.style.marginTop = '-40px';
+        var profile_givenName = document.createElement('div');
+        profile_givenName.className = 'profile_name';
+        profile_givenName.innerText = this.givenName;
+
+        var familyName_label = document.createElement('div');
+        familyName_label.className = 'profile_label';
+        familyName_label.innerText = 'Family/Current Name';
+        var profile_familyName = document.createElement('div');
+        profile_familyName.className = 'profile_name';
+        profile_familyName.innerText = this.familyName;
+
+        var dob_label = document.createElement('div');
+        dob_label.className = 'profile_label';
+        dob_label.innerText = 'Date of Birth';
+        var profile_dob = document.createElement('div');
+        profile_dob.className = 'profile_date';
+        profile_dob.innerText = this.dateOfBirth;
+
+        profile_div.append(profile_photo, givenName_label, profile_givenName, familyName_label, profile_familyName, dob_label, profile_dob);
+
+        // add this only if it has info
+        if(this.dateOfDeath) {
+            var dod_label = document.createElement('div');
+            dod_label.className = 'profile_label';
+            dod_label.innerText = 'Date of Death';
+            var profile_dod = document.createElement('div');
+            profile_dod.className = 'profile_date';
+            profile_dod.innerText = this.dateOfDeath;
+
+            profile_div.append(dod_label, profile_dod);
+
+        }
+
+        var details_label = document.createElement('div');
+        details_label.className = 'profile_label';
+        details_label.innerText = 'Details';
+        var profile_details = document.createElement('div');
+        profile_details.className = 'profile_details';
+        profile_details.innerText = this.details;
+
+        var edit_pencil = document.createElement('img');
+        edit_pencil.className = 'edit_pencil';
+        edit_pencil.id = 'edit_profile_button';
+        edit_pencil.src = 'static/edit_pencil.svg';
+        // on click, start edit sequence..
+        // of let's just try to convert something to a form input
+        edit_pencil.addEventListener('click', function() {
+               console.log('show edit view');
+        });
+
+        var trash_can = document.createElement('img');
+        trash_can.className = 'trash_can';
+        trash_can.id = 'delete_profile_button';
+        trash_can.src = 'static/trash_can.svg';
+        trash_can.setAttribute('var', this.id);
+        trash_can.addEventListener('click', function(event) {
+            
+            var owner_id = event.target.getAttribute('var');
+            
+            var cards = document.getElementsByClassName('card');
+            for( let card of cards ) {
+                if(card.id == owner_id) {
+                    card.remove();
+                }
+            }
+            close_profile();
+            delete_person(owner_id);
+        });
+
+        profile_div.append(details_label, profile_details, edit_pencil, trash_can);
+
+
+        // do we need gender? idk.
+
+
+        var click_barrier = document.createElement('div');
+        click_barrier.className = 'click_barrier';
+
+        body.append(click_barrier, profile_div);
+
+        // listen for clicks outside of the profile
+        setTimeout(function () {
+        body.addEventListener('click', outside_click );
+        }, 100);
+
+        function outside_click(event) {
+
+            var clicked_in = true;
+            var clicked_element = event.target;
+        
+            do {
+                
+                // target element must be profile_div, or a child
+                if(clicked_element == profile_div) {
+                    return // exit checking loop
+                }
+                // anything other than the profile div needs to check it's parent
+                let next_parent = clicked_element.parentElement;
+                
+                // next two ifs will loop until it either finds the profile
+                // or it finds the body.
+                if(next_parent == profile_div) {
+                    return // exit checking loop
+                }
+                
+                if(next_parent == body ) {
+                    clicked_in = false;
+                    // remove profile div and stop this listener
+                    close_profile();
+                
+                }
+
+                // assignment for next iteration..
+                clicked_element = next_parent;
+
+            } while (clicked_in);
+
+        }
+        
+        function close_profile() {
+            profile_div.remove();
+            click_barrier.remove();
+            body.removeEventListener('click', outside_click);
+
+        }
+
+    }
+
 }
+
 
 // to delete this person from all javascript and post AJAX to remove from db
 function delete_person(id) {
@@ -325,9 +478,9 @@ function delete_person(id) {
             }
         }
         
-        // remove html element - changed to be done in onclick function
-        //var persons_element = document.getElementById(id);
-        //persons_element.remove();
+        // remove html element - 
+        // for cards this is different than siblings
+        // do in click function
 
 
         // build json to send POST
@@ -351,21 +504,30 @@ function delete_person(id) {
 // call when needing to add a person to the database
 function create_new_person() {
     // perform a check to see if this form is already available?
+    var existing_form = document.getElementById('create_person_container')
+    if(existing_form) {
+        existing_form.classList.remove('new_person_visible');
+        return
+    }
 
     // maybe we just have a popup for now. just something quick
     let container = document.createElement('div');
     container.id = 'create_person_container';
+    container.classList.add('new_person_visible');
 
     let form_holder = document.createElement('form');
     form_holder.name = 'create_person';
     form_holder.setAttribute('onsubmit', 'event.preventDefault();');
     form_holder.id = 'create_person_form';
 
-    let close_form_button = document.createElement('button');
-    close_form_button.id = 'close_form_button';
-    close_form_button.addEventListener('click', function(){ container.remove(); });
-    close_form_button.innerText = 'X';
-    form_holder.appendChild(close_form_button);
+    let hide_form = document.createElement('div');
+    hide_form.id = 'hide_form';
+    hide_form.addEventListener('click', function(){ 
+        // edit classList of #create_person_container
+        container.classList.add('new_person_visible');
+        // container.remove(); 
+    });
+    form_holder.appendChild(hide_form);
     
     let form_title = document.createElement('h1');
     form_title.innerText = 'Create a New Person';
@@ -379,7 +541,7 @@ function create_new_person() {
     gName_input.autofocus = true;
     gName_input.type = 'text';
     gName_input.autocomplete = 'off';
-    gName_input.placeholder = 'Given Name - required';
+    gName_input.placeholder = 'Given/Birth Name *';
     gName_div.appendChild(gName_input);
     form_holder.appendChild(gName_div);
     
@@ -395,31 +557,39 @@ function create_new_person() {
 
     let gender_div = document.createElement('div');
     gender_div.className = 'input_div radio_div';
-    let gender_male = document.createElement('input');
-    gender_male.className = 'radio_input';
-    let male_label = document.createElement('label');
-    male_label.className = 'input_label';
-    gender_male.id = 'male_radio';
-    gender_male.value = 1;
-    male_label.for = 'male_radio';
-    male_label.innerText = 'Male';
-    gender_male.type = 'checkbox';
+    
+    let male_holder = document.createElement('label');
+    male_holder.className = 'checkbox_holder';
+    male_holder.innerText = 'Male';
+    male_holder.for = 'male_radio';
+    let male_input = document.createElement('input');
+    male_input.className = 'radio_input';
+    male_input.id = 'male_radio';
+    male_input.value = 1;
+    male_input.type = 'checkbox';
+    let male_checkmark = document.createElement('span');
+    male_checkmark.className = 'checkmark';
 
-    let gender_female = document.createElement('input');
-    gender_female.className = 'radio_input';
-    let female_label = document.createElement('label');
-    female_label.className = 'input_label';
-    gender_female.id = 'female_radio';
-    gender_female.value = 0;
-    female_label.for = 'female_radio';
-    female_label.innerText = 'Female';
-    gender_female.type = 'checkbox';
+    male_holder.append(male_input, male_checkmark);
+    
+    let female_holder = document.createElement('label');
+    female_holder.className = 'checkbox_holder';
+    female_holder.innerText = 'Female';
+    let female_input = document.createElement('input');
+    female_input.className = 'radio_input';
+    female_input.id = 'female_radio';
+    female_input.value = 0;
+    female_input.type = 'checkbox';
+    let female_checkmark = document.createElement('span');
+    female_checkmark.className = 'checkmark';
 
-    gender_div.append(gender_male, male_label, gender_female, female_label);
+    female_holder.append(female_input, female_checkmark);
+
+    gender_div.append(male_holder, female_holder);
     form_holder.appendChild(gender_div);
 
     let dob_div = document.createElement('div');
-    dob_div.className = 'input_div';
+    dob_div.className = 'input_div date';
     let dob_label = document.createElement('label');
     dob_label.className = 'input_label';
     dob_label.innerText = 'Date of Birth';
@@ -428,11 +598,12 @@ function create_new_person() {
     date_of_birth.type = 'date';
     date_of_birth.autocomplete = 'off';
     date_of_birth.placeholder = 'Date of Birth';
-    dob_div.append(date_of_birth, dob_label);
+    dob_div.append(dob_label, date_of_birth);
     form_holder.appendChild(dob_div);
 
+    // have a plus icon to show this
     let dod_div = document.createElement('div');
-    dod_div.className = 'input_div';
+    dod_div.className = 'input_div date hidden';
     let dod_label = document.createElement('label');
     dod_label.className = 'input_label';
     dod_label.innerText = 'Date of Death';
@@ -441,14 +612,30 @@ function create_new_person() {
     date_of_death.type = 'date';
     date_of_death.autocomplete = 'off';
     date_of_death.placeholder = 'Date of Death';
-    dod_div.append(date_of_death, dod_label);
-    form_holder.appendChild(dod_div);
+
+    let toggle_dod = document.createElement('div');
+    toggle_dod.className = 'toggle_dod';
+    toggle_dod.addEventListener('click', function() {
+        console.log('toggle dod');
+        console.log(dod_div);
+        if(dod_div.classList.contains('hidden')) {
+            dod_div.classList.remove('hidden');
+            toggle_dod.classList.add('showing');
+        } else {
+            dod_div.classList.add('hidden');
+            toggle_dod.classList.remove('showing');
+        }
+    });
+
+    dod_div.append( dod_label, date_of_death);
+    form_holder.append(toggle_dod, dod_div);
 
     let details_div = document.createElement('div');
     details_div.className = 'input_div';
-    let details = document.createElement('input');
-    details.className = 'text_input';
+    let details = document.createElement('textarea');
+    details.className = 'text_input details';
     details.type = 'text';
+    details.maxLength = 280;
     details.autocomplete = 'off';
     details.placeholder = 'Details';
     details_div.appendChild(details);
@@ -520,8 +707,15 @@ function create_new_person() {
 
 
     container.appendChild(form_holder);
-    page.appendChild(container);
+    
+    // we now want to create this form somehow off the existing side_menu
+    navbar.append(container);
 
+    // may do a timeout?
+    setTimeout(function (){
+        container.classList.remove('new_person_visible');
+    }, 10);
+    
 
     function validate_and_post() {
 
@@ -535,7 +729,7 @@ function create_new_person() {
             console.log(date_of_birth.value);
             new_person_object.dateOfDeath = myDateFormat(date_of_death.value);
             new_person_object.details = details.value;
-            if(gender_male.checked == true) {
+            if(male_input.checked == true) {
                 new_person_object.gender = 1;
             } else {
                 new_person_object.gender = 0;
@@ -602,25 +796,25 @@ function create_new_person() {
         function checkRequiredFields() {
             let required_bool = true;
             console.log(gName_input.value);
-            console.log(gender_male.checked);
-            console.log(gender_female.checked);
+            console.log(male_input.checked);
+            console.log(female_input.checked);
 
             if(!gName_input.value) {
                 // set givenName outline to red
                 gName_input.style.borderColor = 'orangered';
                 required_bool = false;
             }
-            if(gender_male.checked == false && gender_female.checked == false) {
-                male_label.style.color = 'orangered';
-                female_label.style.color = 'orangered';
+            if(male_input.checked == false && female_input.checked == false) {
+                male_checkmark.classList.add('required');
+                female_checkmark.classList.add('required');
                 required_bool = false;
             }
 
-            if(gender_male.checked == true && gender_female.checked == true) {
-                gender_male.checked = false;
-                gender_female.checked = false;
-                male_label.style.color = 'orangered';
-                female_label.style.color = 'orangered';
+            if(male_input.checked == true && female_input.checked == true) {
+                male_input.checked = false;
+                female_input.checked = false;
+                male_checkmark.classList.add('required');
+                female_checkmark.classList.add('required');
                 required_bool = false;
             }
             
@@ -687,7 +881,7 @@ function build_tree(selected_person) {
         // loop their siblings and add them to the sibling div
         for( let sibling of person_to_build.siblings ) {
             let sib_icon = sibling.sibling_icon();
-            person_to_build.sibling_div.appendChild(sib_icon);
+            person_to_build.sibling_div.insertBefore(sib_icon, person_to_build.sibling_div.firstElementChild);
             sibling.hasCard = true;
             sibling.cardHolder = sib_icon;
         }
@@ -814,27 +1008,32 @@ function get_relation_list() {
 }
 
 
-var side_menu = document.getElementById('side_menu');
-side_menu.classList.add('one-edge-shadow');
+var navbar_class = document.getElementsByClassName('navbar');
+var navbar = navbar_class[0];
+navbar.classList.add('one-edge-shadow');
+
+var navbar_options = document.createElement('div');
+navbar_options.className = 'navbar_options';
+
 
 var plus_icon = document.createElement('img');
 plus_icon.src = 'static/plus_icon.png';
 plus_icon.addEventListener('click', create_new_person);
 plus_icon.className = 'button';
 plus_icon.alt = 'create a new person';
-side_menu.appendChild(plus_icon);
 
 var button2 = document.createElement('button');
 //button2.addEventListener('click', get_relation_list);
 button2.className = 'button';
 button2.innerText = 'test button';
-side_menu.appendChild(button2);
+
 
 var settings_icon = document.createElement('img');
 settings_icon.src = 'static/settings_icon.svg';
 settings_icon.className = 'button';
 settings_icon.id = 'settings';
 
-side_menu.appendChild(settings_icon);
+navbar_options.append(plus_icon, button2, settings_icon);
 
+navbar.appendChild(navbar_options);
 
