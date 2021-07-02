@@ -136,6 +136,35 @@ body {
 .trash_can:hover {
     filter: invert(13%) sepia(67%) saturate(6253%) hue-rotate(12deg) brightness(96%) contrast(110%);
 }
+.save_edits {
+    background-color: green;
+    width: 60px;
+    height: 24px;
+    position: absolute;
+    right: 10px;
+    bottom: 15px;
+    border-radius: 3px;
+    color: #cdcdcd;
+    font-family: inherit;
+    font-size: 18px;
+    text-align: center;
+    cursor: pointer;
+}
+.cancel_edits {
+    background-color: #a1adb8;
+    width: 60px;
+    height: 24px;
+    position: absolute;
+    left: 10px;
+    bottom: 15px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 18px;
+    text-align: center;
+    color: #303030;
+    cursor: pointer;
+
+}
 .card {
     border-radius: 5px;
     box-shadow: 0px 15px 35px -20px black;

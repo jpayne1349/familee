@@ -272,9 +272,10 @@ class Person {
     }
 
     // show profile.. click out of the box should close?
-    profile() {
+    // we could pass in whether the view should be display?
+    // or edit?
 
-        // document listener for closing profile div
+    profile() {
 
         var profile_div = document.createElement('div');
         profile_div.className = 'profile_div';
@@ -330,14 +331,74 @@ class Person {
         profile_details.className = 'profile_details';
         profile_details.innerText = this.details;
 
+        // EDIT VIEW
+        // hide the current divs that are displaying info?
+        var edit_givenName = document.createElement('input');
+        edit_givenName.className = 'edit_text_input';
+        edit_givenName.type = 'text';
+        edit_givenName.value = this.givenName;
+        // auto populate with current data
+        
+        var edit_familyName = document.createElement('input');
+        edit_familyName.className = 'edit_text_input';
+        edit_familyName.type = 'text';
+        edit_familyName.value = this.familyName;
+
+        var edit_dateOfBirth = document.createElement('input');
+        edit_dateOfBirth.className = 'edit_date_input';
+        edit_dateOfBirth.type = 'date';
+        edit_dateOfBirth.value = this.dateOfBirth;
+
+        var edit_dateOfDeath = document.createElement('input');
+        edit_dateOfDeath.className = 'edit_date_input';
+        edit_dateOfDeath.type = 'date';
+        edit_dateOfDeath.value = this.dateOfDeath;
+
+        var edit_details = document.createElement('textarea');
+        edit_details.className = 'edit_textarea_input';
+        //edit_details.type = 'text';
+        edit_details.value = this.details;
+
+        var save_edits = document.createElement('div');
+        save_edits.className = 'save_edits';
+        save_edits.innerText = 'Save';
+        save_edits.setAttribute('var', this.id);
+        save_edits.addEventListener('click', function(event) {
+            var owner_id = event.target.getAttribute('var');
+
+            save_profile(owner_id);
+
+        });
+
+        var cancel_edits = document.createElement('div');
+        cancel_edits.className = 'cancel_edits';
+        cancel_edits.innerText = 'Cancel';
+
         var edit_pencil = document.createElement('img');
         edit_pencil.className = 'edit_pencil';
         edit_pencil.id = 'edit_profile_button';
         edit_pencil.src = 'static/edit_pencil.svg';
-        // on click, start edit sequence..
-        // of let's just try to convert something to a form input
         edit_pencil.addEventListener('click', function() {
-               console.log('show edit view');
+            console.log('show edit view');
+            // just do this in here for now?
+            profile_givenName.remove();
+            givenName_label.after(edit_givenName);
+
+            profile_familyName.remove();
+            familyName_label.after(edit_familyName);
+
+            profile_dob.remove();
+            dob_label.after(edit_dateOfBirth);
+
+            // conditional DOD addition
+
+            profile_details.remove();
+            details_label.after(edit_details);
+
+            edit_details.after(save_edits, cancel_edits);
+
+            edit_pencil.style.display = 'none';
+
         });
 
         var trash_can = document.createElement('img');
@@ -416,6 +477,81 @@ class Person {
 
         }
 
+        function save_profile(id) {
+            // grab information from the inputs, 
+            // and send it to the server for updating.
+            // we can get the id like this?
+            
+            var edit_person_object = {};
+            edit_person_object.id = id;
+            console.log('editing id: ', edit_person_object.id);
+            edit_person_object.givenName = edit_givenName.value;
+            edit_person_object.familyName = edit_familyName.value;
+            edit_person_object.dateOfBirth = edit_dateOfBirth.value;
+            // DOD TBD
+            edit_person_object.details = edit_details.value;
+            // gender should not change. lol
+            
+            // add relationships to this, obviously
+            var json_string = JSON.stringify(edit_person_object);
+
+            // post to server
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.open('POST', '/edit_person');
+            ajax_request.setRequestHeader("Content-Type", "application/json");
+            ajax_request.send(json_string);
+
+            ajax_request.onload = function() {
+                // log response for now
+                console.log(this.response);
+                // need to refresh everything really.
+                // we can't just refresh the tree. unless
+                // we
+                var js_person = person_from_id(edit_person_object.id);
+                // this is prolly not working.
+                js_person.update_profile(edit_person_object);
+
+                update_tree();
+
+                // close edit view../ update displays
+                edit_givenName.remove();
+                givenName_label.after(profile_givenName);
+
+                edit_familyName.remove();
+                familyName_label.after(profile_familyName);
+
+                edit_dateOfBirth.remove();
+                dob_label.after(profile_dob);
+
+                // conditional DOD addition
+
+                edit_details.remove();
+                details_label.after(profile_details);
+
+                save_edits.remove();
+                cancel_edits.remove();
+
+                edit_pencil.style.display = 'block';
+                
+            }
+            
+
+            // probably remove the inputs and display
+            // the normal divs again.
+
+        }
+
+    }
+
+    update_profile(javascript_object) { 
+        
+        this.givenName = javascript_object.givenName;
+        this.familyName = javascript_object.familyName;
+        this.dateOfBirth = javascript_object.dateOfBirth;
+        this.details = javascript_object.details;
+
+        
+        console.log('updated profile', this);
     }
 
 }
@@ -761,6 +897,7 @@ function create_new_person() {
                 // this should leave us in a state where both global arrays are updated
                 update_tree();
                 
+                // TODO: this is removing the form container after post???
                 container.remove();
                 
             };

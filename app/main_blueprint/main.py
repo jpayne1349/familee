@@ -92,6 +92,24 @@ def delete_person():
 
     return 'deleted'
 
+
+@main_blueprint.route('/edit_person', methods=['POST'])
+def edit_person():
+
+    dict_person = request.json
+    
+    #lookup
+    person_to_edit = Person.query.filter_by(id = dict_person['id']).first()
+    person_to_edit.givenName = dict_person['givenName']
+    person_to_edit.familyName = dict_person['familyName']
+    person_to_edit.dateOfBirth  = dict_person['dateOfBirth']
+    person_to_edit.details = dict_person['details']
+
+    db.session.add(person_to_edit)
+    db.session.commit()
+
+    return 'edited'
+
 # turns the database objects into a python dictionary, which can be converted to JSON
 # TODO: manual input of the attributes was required. Maybe it's not neccessary? the properties of an object can be collected in a loop? 
 def personObjectsToJson(person_list):
