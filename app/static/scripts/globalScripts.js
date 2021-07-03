@@ -379,7 +379,6 @@ class Person {
         edit_pencil.id = 'edit_profile_button';
         edit_pencil.src = 'static/edit_pencil.svg';
         edit_pencil.addEventListener('click', function() {
-            console.log('show edit view');
             // just do this in here for now?
             profile_givenName.remove();
             givenName_label.after(edit_givenName);
@@ -484,7 +483,6 @@ class Person {
             
             var edit_person_object = {};
             edit_person_object.id = id;
-            console.log('editing id: ', edit_person_object.id);
             edit_person_object.givenName = edit_givenName.value;
             edit_person_object.familyName = edit_familyName.value;
             edit_person_object.dateOfBirth = edit_dateOfBirth.value;
@@ -502,36 +500,39 @@ class Person {
             ajax_request.send(json_string);
 
             ajax_request.onload = function() {
-                // log response for now
-                console.log(this.response);
-                // need to refresh everything really.
-                // we can't just refresh the tree. unless
-                // we
+
+                // this is on response..
+                // we are assuming success right now
+
                 var js_person = person_from_id(edit_person_object.id);
                 // this is prolly not working.
                 js_person.update_profile(edit_person_object);
 
-                update_tree();
-
                 // close edit view../ update displays
                 edit_givenName.remove();
+                profile_givenName.innerText = js_person.givenName;
                 givenName_label.after(profile_givenName);
 
                 edit_familyName.remove();
+                profile_familyName.innerText = js_person.familyName;
                 familyName_label.after(profile_familyName);
 
                 edit_dateOfBirth.remove();
+                profile_dateOfBirth.innerText = js_person.dateOfBirth;
                 dob_label.after(profile_dob);
 
                 // conditional DOD addition
 
                 edit_details.remove();
+                profile_details.innerText = js_person.details;
                 details_label.after(profile_details);
 
                 save_edits.remove();
                 cancel_edits.remove();
 
                 edit_pencil.style.display = 'block';
+
+                update_tree();
                 
             }
             
@@ -543,6 +544,8 @@ class Person {
 
     }
 
+    // updates properties based on passed in object
+    // has to remove the card element, to force update
     update_profile(javascript_object) { 
         
         this.givenName = javascript_object.givenName;
@@ -550,8 +553,11 @@ class Person {
         this.dateOfBirth = javascript_object.dateOfBirth;
         this.details = javascript_object.details;
 
-        
-        console.log('updated profile', this);
+        var elem = this.cardHolder;
+        elem.remove();
+
+        this.cardHolder = undefined;
+        this.hasCard = false;
     }
 
 }
@@ -728,8 +734,6 @@ function create_new_person() {
     let toggle_dod = document.createElement('div');
     toggle_dod.className = 'toggle_dod';
     toggle_dod.addEventListener('click', function() {
-        console.log('toggle dod');
-        console.log(dod_div);
         if(dod_div.classList.contains('hidden')) {
             dod_div.classList.remove('hidden');
             toggle_dod.classList.add('showing');
@@ -838,7 +842,6 @@ function create_new_person() {
             new_person_object.givenName = gName_input.value;
             new_person_object.familyName = fName_input.value;
             new_person_object.dateOfBirth = myDateFormat(date_of_birth.value);
-            console.log(date_of_birth.value);
             new_person_object.dateOfDeath = myDateFormat(date_of_death.value);
             new_person_object.details = details.value;
             if(male_input.checked == true) {
@@ -849,7 +852,6 @@ function create_new_person() {
 
             if(PERSON_ARRAY.length > 0) {
                 let relation_select = document.getElementById('relation_type_select')
-                console.log(relation_select);
                 let person_selected = document.getElementById('person_select');
                 switch(relation_select.value) {
                     case 'a': // the new person is the parent
@@ -882,7 +884,6 @@ function create_new_person() {
             // this is from the response
             ajax_request.onload = function() { 
                 javascript_array = JSON.parse(this.response);
-                console.log('person added response', javascript_array);
                 // in this response only, index 0 is the person, and 1 is the relation
                 var person_instance = new Person(javascript_array[0]);
                 if(PERSON_ARRAY.length == 0) {
@@ -908,9 +909,6 @@ function create_new_person() {
 
         function checkRequiredFields() {
             let required_bool = true;
-            console.log(gName_input.value);
-            console.log(male_input.checked);
-            console.log(female_input.checked);
 
             if(!gName_input.value) {
                 // set givenName outline to red
@@ -963,7 +961,6 @@ function update_tree() {
 // builds html elements and assigns css order values to organize visuals
 function build_tree(selected_person) {
 
-    console.log(PERSON_ARRAY);
     // empty buffer
     let person_buffer = []; 
 
