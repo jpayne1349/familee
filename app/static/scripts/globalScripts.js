@@ -286,11 +286,16 @@ class Person {
         profile_photo.className = 'profile_photo';
         profile_photo.src = 'static/profile_icon.png';
 
+        var profile_info_container = document.createElement('div');
+        profile_info_container.className = 'profile_info_container';
+
+        var person_info_col = document.createElement('div');
+        person_info_col.className = 'person_info_col';
+
         var givenName_label = document.createElement('div');
         givenName_label.className = 'profile_label';
         givenName_label.innerText = 'Given/Birth Name';
         // slide this up a bit for now
-        givenName_label.style.marginTop = '-40px';
         var profile_givenName = document.createElement('div');
         profile_givenName.className = 'profile_name';
         profile_givenName.innerText = this.givenName;
@@ -309,7 +314,7 @@ class Person {
         profile_dob.className = 'profile_date';
         profile_dob.innerText = this.dateOfBirth;
 
-        profile_div.append(profile_photo, givenName_label, profile_givenName, familyName_label, profile_familyName, dob_label, profile_dob);
+        person_info_col.append(givenName_label, profile_givenName, familyName_label, profile_familyName, dob_label, profile_dob);
 
         // add this only if it has info
         if(this.dateOfDeath) {
@@ -320,7 +325,7 @@ class Person {
             profile_dod.className = 'profile_date';
             profile_dod.innerText = this.dateOfDeath;
 
-            profile_div.append(dod_label, profile_dod);
+            person_info_col.append(dod_label, profile_dod);
 
         }
 
@@ -331,7 +336,40 @@ class Person {
         profile_details.className = 'profile_details';
         profile_details.innerText = this.details;
 
-        // EDIT VIEW
+        person_info_col.append(details_label, profile_details);
+
+        // RELATIONSHIPS
+        var relative_info_col = document.createElement('div');
+        relative_info_col.className = 'relative_info_col';
+
+
+        // parents and children first
+        var parents_label =document.createElement('div');
+        parents_label.className = 'profile_label';
+        parents_label.classList.add('relation_label');
+        parents_label.innerText = 'Parents';
+        var profile_parents = document.createElement('div');
+        profile_parents.className = 'profile_array';
+        array_to_element(this.parents, profile_parents);
+        // this is an array of objects..
+        
+        var children_label =document.createElement('div');
+        children_label.className = 'profile_label';
+        children_label.classList.add('relation_label');
+        children_label.innerText = 'Children';
+        var profile_children = document.createElement('div');
+        profile_children.className = 'profile_array';
+        array_to_element(this.children, profile_children);
+
+        var siblings_label =document.createElement('div');
+        siblings_label.className = 'profile_label';
+        siblings_label.classList.add('relation_label');
+        siblings_label.innerText = 'Siblings';
+        var profile_siblings = document.createElement('div');
+        profile_siblings.className = 'profile_array';
+        array_to_element(this.siblings, profile_siblings);
+
+        // EDIT ELEMENTS
         // hide the current divs that are displaying info?
         var edit_givenName = document.createElement('input');
         edit_givenName.className = 'edit_text_input';
@@ -358,7 +396,27 @@ class Person {
         edit_details.className = 'edit_textarea_input';
         //edit_details.type = 'text';
         edit_details.value = this.details;
+        
+        var add_relative_container = document.createElement('div');
+        add_relative_container.className = 'add_relative_container';
 
+        var add_relative_label = document.createElement('div');
+        add_relative_label.className = 'profile_label';
+        add_relative_label.classList.add('relative');
+        add_relative_label.innerText = 'Add Relative';
+        var add_relative_plus = document.createElement('div');
+        add_relative_plus.className = 'add_relative_plus'; 
+        add_relative_plus.addEventListener('click', function() {
+            console.log('display add relative stuff');
+            // list current people
+            // selection of type of relation
+        });
+
+        add_relative_container.append(add_relative_label, add_relative_plus);
+
+        var edit_buttons = document.createElement('div');
+        edit_buttons.className = 'edit_buttons';
+    
         var save_edits = document.createElement('div');
         save_edits.className = 'save_edits';
         save_edits.innerText = 'Save';
@@ -373,6 +431,28 @@ class Person {
         var cancel_edits = document.createElement('div');
         cancel_edits.className = 'cancel_edits';
         cancel_edits.innerText = 'Cancel';
+        cancel_edits.addEventListener('click', function() {
+            // remove inputs and return divs
+            edit_givenName.remove();
+            givenName_label.after(profile_givenName);
+
+            edit_familyName.remove();
+            familyName_label.after(profile_familyName);
+
+            edit_dateOfBirth.remove();
+            dob_label.after(profile_dob);
+
+            // conditional DOD addition
+
+            edit_details.remove();
+            details_label.after(profile_details);
+
+            edit_buttons.remove();
+
+            edit_pencil.style.display = 'block';
+        });
+
+        edit_buttons.append(cancel_edits, save_edits);
 
         var edit_pencil = document.createElement('img');
         edit_pencil.className = 'edit_pencil';
@@ -394,7 +474,7 @@ class Person {
             profile_details.remove();
             details_label.after(edit_details);
 
-            edit_details.after(save_edits, cancel_edits);
+            profile_info_container.after(edit_buttons);
 
             edit_pencil.style.display = 'none';
 
@@ -419,10 +499,14 @@ class Person {
             delete_person(owner_id);
         });
 
-        profile_div.append(details_label, profile_details, edit_pencil, trash_can);
 
+
+        relative_info_col.append(parents_label, profile_parents, children_label, profile_children, siblings_label, profile_siblings, add_relative_container);
+
+        profile_info_container.append(person_info_col, relative_info_col)
 
         // do we need gender? idk.
+        profile_div.append(edit_pencil, profile_photo, trash_can, profile_info_container);
 
 
         var click_barrier = document.createElement('div');
@@ -439,12 +523,16 @@ class Person {
 
             var clicked_in = true;
             var clicked_element = event.target;
-        
+    
             do {
                 
                 // target element must be profile_div, or a child
                 if(clicked_element == profile_div) {
                     return // exit checking loop
+                }
+                // quick fix for cancel_edits button
+                if(clicked_element.className == 'cancel_edits') {
+                    return
                 }
                 // anything other than the profile div needs to check it's parent
                 let next_parent = clicked_element.parentElement;
@@ -485,7 +573,7 @@ class Person {
             edit_person_object.id = id;
             edit_person_object.givenName = edit_givenName.value;
             edit_person_object.familyName = edit_familyName.value;
-            edit_person_object.dateOfBirth = edit_dateOfBirth.value;
+            edit_person_object.dateOfBirth = myDateFormat(edit_dateOfBirth.value);
             // DOD TBD
             edit_person_object.details = edit_details.value;
             // gender should not change. lol
@@ -518,7 +606,7 @@ class Person {
                 familyName_label.after(profile_familyName);
 
                 edit_dateOfBirth.remove();
-                profile_dateOfBirth.innerText = js_person.dateOfBirth;
+                profile_dob.innerText = js_person.dateOfBirth;
                 dob_label.after(profile_dob);
 
                 // conditional DOD addition
@@ -539,6 +627,18 @@ class Person {
 
             // probably remove the inputs and display
             // the normal divs again.
+
+        }
+
+        function array_to_element(array, parent_elem) {
+            
+            array.forEach(function(person) {
+                var person_elem = document.createElement('div');
+                person_elem.className = 'profile_relation';
+                person_elem.innerText = person.givenName;
+
+                parent_elem.appendChild(person_elem);
+            });
 
         }
 
@@ -883,7 +983,7 @@ function create_new_person() {
             ajax_request.send(json_string);
             // this is from the response
             ajax_request.onload = function() { 
-                javascript_array = JSON.parse(this.response);
+                var javascript_array = JSON.parse(this.response);
                 // in this response only, index 0 is the person, and 1 is the relation
                 var person_instance = new Person(javascript_array[0]);
                 if(PERSON_ARRAY.length == 0) {
@@ -934,11 +1034,12 @@ function create_new_person() {
         
     }
 
-    function myDateFormat(js_date) {
+}
+
+function myDateFormat(js_date) {
         let new_date = js_date.replace(/-/g, '');
         return new_date
     }
-}
 
 // this should eventually just append something to the tree. right now, to complicated to see
 // for now, this will delete tree and rebuild
@@ -1069,7 +1170,7 @@ function get_person_list() {
     ajax_request.onload = function() {
 
         var json_string = this.response;
-        js_array = JSON.parse(json_string);
+        var js_array = JSON.parse(json_string);
         
         js_array.forEach( function(json_object) {
             var person_instance = new Person(json_object);
