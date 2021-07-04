@@ -5,3 +5,4 @@ env
 app.db
 migrations
 projectNotes
+__pycache__
