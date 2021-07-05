@@ -14,7 +14,7 @@ var body = document.body;
 // run on page load?
 function main() {
     // this calls everything else right now!
-    get_person_list();    
+    get_person_list();    "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
 }
 
@@ -38,7 +38,7 @@ class Person {
         this.children = [];
         this.parents = [];
         this.partners = [];
-        this.hasChildren = false;
+
 
         this.branchLevel;
         this.cardNumber;
@@ -55,7 +55,7 @@ class Person {
     }
     add_child(selected_person) {
         this.children.push(selected_person);
-        this.hasChildren = true;
+
     }
     add_sibling(selected_person) {
         this.siblings.push(selected_person);
@@ -350,15 +350,17 @@ class Person {
         parents_label.innerText = 'Parents';
         var profile_parents = document.createElement('div');
         profile_parents.className = 'profile_array';
+        profile_parents.id = 'profile_parents';
         array_to_element(this.parents, profile_parents);
         // this is an array of objects..
         
-        var children_label =document.createElement('div');
+        var children_label = document.createElement('div');
         children_label.className = 'profile_label';
         children_label.classList.add('relation_label');
         children_label.innerText = 'Children';
         var profile_children = document.createElement('div');
         profile_children.className = 'profile_array';
+        profile_children.id = 'profile_children';
         array_to_element(this.children, profile_children);
 
         var siblings_label =document.createElement('div');
@@ -367,6 +369,7 @@ class Person {
         siblings_label.innerText = 'Siblings';
         var profile_siblings = document.createElement('div');
         profile_siblings.className = 'profile_array';
+        profile_siblings.id = 'profile_siblings';
         array_to_element(this.siblings, profile_siblings);
 
         // EDIT ELEMENTS
@@ -397,22 +400,66 @@ class Person {
         //edit_details.type = 'text';
         edit_details.value = this.details;
         
+        // edit relatives is more applicable
+        // allow deletion of relatives that are there..
+        // like deletion of the relationship, not the person?
+        // you could leave the add relative button. 
+        // 
+
         var add_relative_container = document.createElement('div');
         add_relative_container.className = 'add_relative_container';
 
-        var add_relative_label = document.createElement('div');
-        add_relative_label.className = 'profile_label';
-        add_relative_label.classList.add('relative');
-        add_relative_label.innerText = 'Add Relative';
-        var add_relative_plus = document.createElement('div');
-        add_relative_plus.className = 'add_relative_plus'; 
-        add_relative_plus.addEventListener('click', function() {
-            console.log('display add relative stuff');
-            // list current people
-            // selection of type of relation
-        });
+        var new_relative_label = document.createElement('div');
+        new_relative_label.className = 'profile_label';
+        new_relative_label.classList.add('relative');
+        new_relative_label.innerText = 'New';
+        new_relative_label.id = 'add_relative_current_id';
+        // add the current person's id to this element
+        new_relative_label.setAttribute('var', this.id);
 
-        add_relative_container.append(add_relative_label, add_relative_plus);
+        var select_new_relative_type = document.createElement('select');
+        select_new_relative_type.className = 'select_input_profile';
+        select_new_relative_type.id = 'select_new_relative_type';
+
+        var parent_option = document.createElement('option');
+        parent_option.innerText = 'Parent';
+        parent_option.className = 'option_input_profile';
+        parent_option.value = 'a';
+        var sibling_option = document.createElement('option');
+        sibling_option.innerText = 'Sibling';
+        sibling_option.className = 'option_input_profile';
+        sibling_option.value = 'c';
+        var child_option = document.createElement('option');
+        child_option.innerText = 'Child';
+        child_option.className = 'option_input_profile';
+        child_option.value = 'b';
+        select_new_relative_type.append(parent_option, sibling_option, child_option);
+
+        var select_new_relative = document.createElement('select');
+        select_new_relative.className = 'select_input_profile';
+        select_new_relative.id = 'select_new_relative';
+        
+        for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
+            let person = PERSON_ARRAY[i];
+            
+            // exclude yourself
+            if(person.id == this.id) {
+                continue
+            }
+
+            let new_option = document.createElement('option');
+            new_option.value = person.id;
+            new_option.innerText = person.givenName;
+            new_option.className = 'option_input_profile';
+            select_new_relative.appendChild(new_option);
+        }
+
+        var confirm_new_relative = document.createElement('div');
+        confirm_new_relative.className = 'confirm_new_relative';
+        confirm_new_relative.innerText = 'Add';
+        confirm_new_relative.addEventListener('click', add_relationship);
+
+        add_relative_container.append(new_relative_label, select_new_relative_type, select_new_relative, confirm_new_relative);
 
         var edit_buttons = document.createElement('div');
         edit_buttons.className = 'edit_buttons';
@@ -431,26 +478,7 @@ class Person {
         var cancel_edits = document.createElement('div');
         cancel_edits.className = 'cancel_edits';
         cancel_edits.innerText = 'Cancel';
-        cancel_edits.addEventListener('click', function() {
-            // remove inputs and return divs
-            edit_givenName.remove();
-            givenName_label.after(profile_givenName);
-
-            edit_familyName.remove();
-            familyName_label.after(profile_familyName);
-
-            edit_dateOfBirth.remove();
-            dob_label.after(profile_dob);
-
-            // conditional DOD addition
-
-            edit_details.remove();
-            details_label.after(profile_details);
-
-            edit_buttons.remove();
-
-            edit_pencil.style.display = 'block';
-        });
+        cancel_edits.addEventListener('click', cancel_edit_view);
 
         edit_buttons.append(cancel_edits, save_edits);
 
@@ -458,27 +486,7 @@ class Person {
         edit_pencil.className = 'edit_pencil';
         edit_pencil.id = 'edit_profile_button';
         edit_pencil.src = 'static/edit_pencil.svg';
-        edit_pencil.addEventListener('click', function() {
-            // just do this in here for now?
-            profile_givenName.remove();
-            givenName_label.after(edit_givenName);
-
-            profile_familyName.remove();
-            familyName_label.after(edit_familyName);
-
-            profile_dob.remove();
-            dob_label.after(edit_dateOfBirth);
-
-            // conditional DOD addition
-
-            profile_details.remove();
-            details_label.after(edit_details);
-
-            profile_info_container.after(edit_buttons);
-
-            edit_pencil.style.display = 'none';
-
-        });
+        edit_pencil.addEventListener('click', show_edit_view );
 
         var trash_can = document.createElement('img');
         trash_can.className = 'trash_can';
@@ -501,7 +509,7 @@ class Person {
 
 
 
-        relative_info_col.append(parents_label, profile_parents, children_label, profile_children, siblings_label, profile_siblings, add_relative_container);
+        relative_info_col.append(parents_label, profile_parents, children_label, profile_children, siblings_label, profile_siblings);
 
         profile_info_container.append(person_info_col, relative_info_col)
 
@@ -615,6 +623,7 @@ class Person {
                 profile_details.innerText = js_person.details;
                 details_label.after(profile_details);
 
+                add_relative_container.remove();
                 save_edits.remove();
                 cancel_edits.remove();
 
@@ -635,11 +644,215 @@ class Person {
             array.forEach(function(person) {
                 var person_elem = document.createElement('div');
                 person_elem.className = 'profile_relation';
-                person_elem.innerText = person.givenName;
+                
+                var person_name = document.createElement('div');
+                person_name.className = 'relation_name';
+                person_name.innerText = person.givenName;
+                person_name.setAttribute('var', person.id);
+
+                var relation_remove = document.createElement('div');
+                relation_remove.className = 'relation_remove';
+
+                person_elem.append(person_name, relation_remove);
 
                 parent_elem.appendChild(person_elem);
             });
 
+        }
+
+        function show_edit_view() {
+            profile_givenName.remove();
+            givenName_label.after(edit_givenName);
+
+            profile_familyName.remove();
+            familyName_label.after(edit_familyName);
+
+            profile_dob.remove();
+            dob_label.after(edit_dateOfBirth);
+
+            // conditional DOD addition
+
+            profile_details.remove();
+            details_label.after(edit_details);
+            
+            profile_siblings.after(add_relative_container);
+
+            profile_info_container.after(edit_buttons);
+
+            // show relation_remove minus and add that functionality
+            var minuses = document.getElementsByClassName('relation_remove');
+            for( let minus of minuses) {
+                minus.classList.add('show');
+                minus.parentElement.addEventListener('click', delete_relationship);
+                minus.parentElement.style.cursor = 'pointer';
+            }
+
+            edit_pencil.style.display = 'none';
+        }
+
+        // process click event for removal of relationship
+        function delete_relationship(event) {
+            var id = event.target.getAttribute('var');
+            var person_object = person_from_id(id);
+            var owner_delete = document.getElementsByClassName('trash_can');
+            var owner_id = owner_delete[0].getAttribute('var');
+            var owner_object = person_from_id(owner_id);
+
+            id = parseInt(id);
+            owner_id = parseInt(owner_id);
+
+            // removal from javascript side
+            for( let entry of RELATION_ARRAY) {
+                console.log('checking entry', entry);
+                if( entry.person_a_id == id && entry.person_b_id == owner_id) {
+                    // person b must be sifted
+                    console.log('removing relationships from arrays');
+                    person_object.remove_relationship(owner_object);
+                    owner_object.remove_relationship(person_object);
+
+                    let index = RELATION_ARRAY.indexOf(entry);
+                    RELATION_ARRAY.splice(index, 1);
+                } else if ( entry.person_b_id == id && entry.person_a_id == owner_id ) {
+                    console.log('removing relationships from arrays');
+                    person_object.remove_relationship(owner_object);
+                    owner_object.remove_relationship(person_object);
+
+                    let index = RELATION_ARRAY.indexOf(entry);
+                    RELATION_ARRAY.splice(index, 1);
+                }
+            }
+            
+            // ajax to remove server side
+            var person_id = {}
+            person_id.id = id;
+        
+            var json_string = JSON.stringify(person_id);
+
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.open("POST", "/remove_relationship");
+            ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
+            ajax_request.send(json_string);
+            ajax_request.onload = function() {
+                // all javascript should be updated.
+                // remove name from current list on profile
+                var profile_relation_div = event.target.parentElement;
+                profile_relation_div.remove();
+
+                console.log('after deletion of relatioship - ', RELATION_ARRAY);
+
+                update_tree();
+            };
+
+        }
+
+        // process select values for creation of relationship entry
+        function add_relationship() {
+            var type = document.getElementById('select_new_relative_type');
+            var adding_person = document.getElementById('select_new_relative');
+            var label_element = document.getElementById('add_relative_current_id');
+            var current_person_id = label_element.getAttribute('var');
+            var current_person_obj = person_from_id(current_person_id);
+
+            var relation_entry = {};
+
+            switch(type.value) {
+                case 'a': // the added person is the parent
+                    relation_entry.relation_type = 0;
+                    relation_entry.person_a_id = parseInt(adding_person.value);
+                    relation_entry.person_b_id = parseInt(current_person_id);
+                    break;
+                case 'b': // the added person is the child
+                    relation_entry.relation_type = 0;
+                    relation_entry.person_a_id = parseInt(current_person_id);
+                    relation_entry.person_b_id = parseInt(adding_person.value);
+                    break;
+                case 'c': // the persons are siblings, doesn't matter
+                    relation_entry.relation_type = 1;
+                    relation_entry.person_a_id = parseInt(current_person_id);
+                    relation_entry.person_b_id = parseInt(adding_person.value);
+                    break;
+            }
+
+            console.log(relation_entry);
+            RELATION_ARRAY.push(relation_entry);
+            create_relationship(relation_entry);
+
+
+            let json_string = JSON.stringify(relation_entry);
+
+            // post section
+            var ajax_request = new XMLHttpRequest();
+            ajax_request.open("POST", "/add_relationship");
+            ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
+            ajax_request.send(json_string);
+            // this is from the response
+            ajax_request.onload = function() {  
+
+                // add to profile view
+                var profile_arrays = document.getElementsByClassName('profile_array');
+                for( let elem of profile_arrays) {
+                    switch(elem.id) {
+                        case 'profile_parents':
+                            //remove what's there
+                            for( let child of elem.children) {
+                                child.remove();
+                            }
+                            // use person object
+                            array_to_element(current_person_obj.parents, elem);
+                            break;
+                        case 'profile_children':
+                            //remove what's there
+                            for( let child of elem.children) {
+                                child.remove();
+                            }
+                            // use person object
+                            array_to_element(current_person_obj.children, elem);
+                            break;
+                        case 'profile_siblings':
+                            //remove what's there
+                            for( let child of elem.children) {
+                                child.remove();
+                            }
+                            // use person object
+                            array_to_element(current_person_obj.siblings, elem);
+                            break;
+                    }
+                }
+
+                update_tree();
+
+            };
+
+        }
+
+        function cancel_edit_view() {
+            // remove inputs and return divs
+            edit_givenName.remove();
+            givenName_label.after(profile_givenName);
+
+            edit_familyName.remove();
+            familyName_label.after(profile_familyName);
+
+            edit_dateOfBirth.remove();
+            dob_label.after(profile_dob);
+
+            // conditional DOD addition
+
+            edit_details.remove();
+            details_label.after(profile_details);
+
+            add_relative_container.remove();
+
+            edit_buttons.remove();
+
+            var minuses = document.getElementsByClassName('relation_remove');
+            for( let minus of minuses) {
+                minus.classList.remove('show');
+                minus.parentElement.removeEventListener('click', delete_relationship);
+                minus.parentElement.style.cursor = 'default';
+            }
+
+            edit_pencil.style.display = 'block';
         }
 
     }
@@ -887,7 +1100,6 @@ function create_new_person() {
         person_select.id = 'person_select';
         //build options in a loop based on the people availables
         for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
-            // refactor for only people with cards??
             let person = PERSON_ARRAY[i];
             // filters out siblings. so you can't add blind relationships
             if( person.cardHolder.className.includes('sibling_icon')) {
@@ -1041,21 +1253,37 @@ function myDateFormat(js_date) {
         return new_date
     }
 
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
 // this should eventually just append something to the tree. right now, to complicated to see
 // for now, this will delete tree and rebuild
 function update_tree() {
     // crude way of finding root right now. as there is no way to change the root yet
-    // remove all branches
-    let branches = document.getElementsByClassName('branch');
-    for(let branch of branches) {
-        branch.remove();
+    //remove all cards
+    console.log('OLD TREE - ', PERSON_ARRAY, RELATION_ARRAY);
+
+    var tree = document.getElementById('tree_container');
+    removeAllChildNodes(tree);
+
+    // unset some properties determined in build_tree
+    for( let person of PERSON_ARRAY) {
+        person.hasCard = false;
+        person.cardHolder = undefined;
+        person.branchLevel = undefined;
+        person.cardNumber = undefined;
+        person.sibling_div = undefined;
     }
+
     // find person with assignedRoot value and pass to build tree
     for( let person of PERSON_ARRAY) {
         if(person.assignedRoot) {
             build_tree(person);
         }
     }
+    console.log('UPDATED TREE - ', PERSON_ARRAY, RELATION_ARRAY);
 }
 
 // being called after all database info has been loaded. 
@@ -1072,7 +1300,6 @@ function build_tree(selected_person) {
 
     // put the root person into the buffer to be processed first
     person_buffer.push(selected_person);
-
     // use array.length to determine if their are still people in the buffer
     while (person_buffer.length > 0) {
         // choose the person from the buffer
@@ -1120,9 +1347,9 @@ function build_tree(selected_person) {
 
 // used to update the current properties of people in a relation entry
 function create_relationship(relation_entry_object) {
-
+    console.log('creating relationship', relation_entry_object);
     switch(relation_entry_object.relation_type) {
-
+        
         // PERSON A IS ALWAYS THE PARENT
         case 0: // parent to child
                 var parent = person_from_id(relation_entry_object.person_a_id);
@@ -1146,6 +1373,7 @@ function create_relationship(relation_entry_object) {
             break;
 
         default:
+            console.log('relation type = ', relation_entry_object.relation_type);
             throw "Relation Type Out of Bounds";
     }
 }
@@ -1178,6 +1406,7 @@ function get_person_list() {
             PERSON_ARRAY.push(person_instance);
         } );
         
+        
         get_relation_list();
         
     } ;
@@ -1200,16 +1429,14 @@ function get_relation_list() {
         if(PERSON_ARRAY.length > 0) {
             // we can probably traverse relationships and build tree from that
             for( let person of PERSON_ARRAY) {
-                if(person.id == 46) {
+                if(person.id == 1) {
                     person.assignedRoot = true;
                     build_tree(person);
                 }
             }
             
         }
-        
-        
-
+    
     } ;
     ajax_request.open("POST", "/database_relation_all");
     ajax_request.setRequestHeader("Content-Type", "application/json"); // important for flask interpretation
@@ -1236,13 +1463,16 @@ plus_icon.alt = 'create a new person';
 var button2 = document.createElement('button');
 //button2.addEventListener('click', get_relation_list);
 button2.className = 'button';
-button2.innerText = 'test button';
+button2.innerText = 'Create Relationship Button';
 
 
-var settings_icon = document.createElement('img');
-settings_icon.src = 'static/settings_icon.svg';
+var settings_icon = document.createElement('button');
+//settings_icon.src = 'static/settings_icon.svg';
 settings_icon.className = 'button';
 settings_icon.id = 'settings';
+settings_icon.innerText = 'Update Tree (dev only)';
+
+settings_icon.addEventListener('click', update_tree);
 
 navbar_options.append(plus_icon, button2, settings_icon);
 

@@ -110,6 +110,34 @@ def edit_person():
 
     return 'edited'
 
+@main_blueprint.route('/remove_relationship', methods=['POST'])
+def remove_relationship():
+    person_id = request.json
+    id_string = person_id["id"]
+    id_number = int(id_string)
+
+    person_a_relations = relation_table.query.filter_by(person_a_id = id_number).all()
+    for relation_a in person_a_relations:
+        db.session.delete(relation_a)
+    db.session.commit()
+
+    person_b_relations = relation_table.query.filter_by(person_b_id=id_number).all()
+    for relation_b in person_b_relations:
+        db.session.delete(relation_b)
+    db.session.commit()
+
+    return 'removed'
+
+@main_blueprint.route('/add_relationship', methods=['POST'])
+def add_relationship():
+    relation_dict = request.json
+
+    new_relation_entry = relation_table(relation_type=relation_dict["relation_type"], person_a_id=relation_dict["person_a_id"], person_b_id=relation_dict["person_b_id"])
+    db.session.add(new_relation_entry)
+    db.session.commit()
+    
+
+    return 'added'
 # turns the database objects into a python dictionary, which can be converted to JSON
 # TODO: manual input of the attributes was required. Maybe it's not neccessary? the properties of an object can be collected in a loop? 
 def personObjectsToJson(person_list):

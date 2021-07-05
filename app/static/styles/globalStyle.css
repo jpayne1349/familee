@@ -150,9 +150,29 @@ body {
 }
 .profile_relation {
     font-size: 15px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
 }
+.relation_name {
 
+}
+.relation_remove {
+    display: none;
+    position: relative;
+}
+.relation_remove:after {
+    position: absolute;
+    left: 5px;
+    top: -2px;
+    content: ' ';
+    height: 7px;
+    width: 2px;
+    background-color: #bb4343;
+    transform: rotate(90deg);
+}
+.relation_remove.show {
+    display:block;
+}
 .add_relative_container {
     flex-basis: 25px;
     display: flex;
@@ -160,21 +180,30 @@ body {
     cursor: pointer;
     padding-top: 15px;
 }
-.add_relative_plus {
-    position: relative;
+.select_input_profile {
+    background-color: #001f3f;
+    border: none;
+    color: white;
+    font-size: 16px;
+    height: 19px;
+    margin: 2px;
+    outline: none;
+    cursor: pointer;
+    border-bottom: 1px solid #a1adb8;
 }
-.add_relative_plus:before, .add_relative_plus:after {
-    position: absolute;
-    left: 5px;
-    top: 1px;
-    content: ' ';
-    height: 10px;
-    width: 2px;
-    background-color: #71be75;
-}
-
-.add_relative_plus:before {
-    transform: rotate(90deg);
+.confirm_new_relative {
+    background-color: #2e7f2e;
+    width: 45px;
+    height: 22px;
+    margin-left: 5px;
+    border-radius: 3px;
+    color: #f2f4f5;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 23px;
 }
 
 .edit_text_input, .edit_date_input, .edit_textarea_input {
@@ -525,7 +554,7 @@ background-color: green;
 }
 
 .select_input {
-    background-color: inherit;
+    background-color: #001f3f;
     border: none;
     color: #ffffffe8;
     font-size: 20px;
