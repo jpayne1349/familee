@@ -1102,8 +1102,10 @@ function create_new_person() {
         for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
             let person = PERSON_ARRAY[i];
             // filters out siblings. so you can't add blind relationships
-            if( person.cardHolder.className.includes('sibling_icon')) {
-                continue
+            if(person.cardHolder) {
+                if( person.cardHolder.className.includes('sibling_icon')) {
+                    continue
+                }
             }
             let new_option = document.createElement('option');
             new_option.value = person.id;
