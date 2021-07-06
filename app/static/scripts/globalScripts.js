@@ -207,7 +207,6 @@ class Person {
         var all_branches = document.getElementsByClassName('branch');
         if(all_branches) {
             for( let branch of all_branches ) {
-                console.log(branch);
                 branch.style.width = (leaf_count * 1000) + 'px';
             }
             branch_container.style.width = (leaf_count * 1000) + 'px';
@@ -901,21 +900,28 @@ function panning_movement() {
     let pos = { top: 0, left: 0, x: 0, y: 0 };
     
     const mouseDownHandler = function(e) {
-        // Change the cursor and prevent user from selecting the text
-        tree_container.style.cursor = 'grabbing';
-        tree_container.style.userSelect = 'none';
         
-        pos = {
-            // The current scroll 
-            left: tree_container.scrollLeft,
-            top: tree_container.scrollTop,
-            // Get the current mouse position
-            x: e.clientX,
-            y: e.clientY,
-        };
+        // makes sure mouse down is in the tree container
+        if(e.target.id == 'tree_container' || e.target.className == 'leaf') {
 
-    document.addEventListener('mousemove', mouseMoveHandler);
-    document.addEventListener('mouseup', mouseUpHandler);
+            // Change the cursor and prevent user from selecting the text
+            tree_container.style.cursor = 'grabbing';
+            tree_container.style.userSelect = 'none';
+            
+            pos = {
+                // The current scroll 
+                left: tree_container.scrollLeft,
+                top: tree_container.scrollTop,
+                // Get the current mouse position
+                x: e.clientX,
+                y: e.clientY,
+            };
+    
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        }
+
+
     };
 
     const mouseMoveHandler = function(e) {
@@ -1413,7 +1419,7 @@ function build_tree(selected_person) {
     var leaf_width = parseInt(leaves[0].style.width);
     var tree_width = tree_container.offsetWidth;
     var center_pos = (leaf_width - tree_width) / 2;
-    console.log(center_pos);
+
     tree_container.scrollLeft = center_pos;
     
 }
@@ -1421,7 +1427,7 @@ function build_tree(selected_person) {
 
 // used to update the current properties of people in a relation entry
 function create_relationship(relation_entry_object) {
-    console.log('creating relationship', relation_entry_object);
+    //console.log('creating relationship', relation_entry_object);
     switch(relation_entry_object.relation_type) {
         
         // PERSON A IS ALWAYS THE PARENT
@@ -1529,29 +1535,34 @@ navbar_options.className = 'navbar_options';
 
 
 var plus_icon = document.createElement('img');
-plus_icon.src = 'static/plus_icon.png';
+plus_icon.src = 'static/add-user.svg';
 plus_icon.addEventListener('click', create_new_person);
 plus_icon.className = 'button';
 plus_icon.alt = 'create a new person';
+plus_icon.style.filter = 'invert(0.9)';
+plus_icon.style.width = '55px';
 
 
-var button2 = document.createElement('button');
+var button2 = document.createElement('img');
 button2.addEventListener('click', function(){
-
+    console.log('create link button pressed! ');
 });
 button2.className = 'button';
-button2.innerText = 'Create Relationship Button';
+//button2.innerText = 'Create Relationship Button';
+button2.src = 'static/link.svg';
+button2.style.filter = 'invert(0.9)';
 
-
-var settings_icon = document.createElement('button');
-//settings_icon.src = 'static/settings_icon.svg';
+var settings_icon = document.createElement('img');
+settings_icon.src = 'static/refresh.svg';
 settings_icon.className = 'button';
 settings_icon.id = 'settings';
-settings_icon.innerText = 'Update Tree (dev only)';
+settings_icon.style.filter = 'invert(0.9)';
+
+//settings_icon.innerText = 'Update Tree (dev only)';
 
 settings_icon.addEventListener('click', update_tree);
 
-navbar_options.append(plus_icon, button2, settings_icon);
 
+navbar_options.append(plus_icon, button2, settings_icon);
 navbar.appendChild(navbar_options);
 
