@@ -14,8 +14,12 @@ var body = document.body;
 // run on page load?
 function main() {
     // this calls everything else right now!
-    get_person_list();    "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-
+    get_person_list();
+    if(window.innerWidth > 1000) {
+        console.log('starting panning function. window width = ', window.innerWidth);
+        panning_movement();
+        //document.addEventListener('mousedown', function(event) {console.log(event.path);});
+    }
 }
 
 
@@ -82,8 +86,6 @@ class Person {
         }
     }
 
-    // used for deletion of this Person instance and associated relationships
-    
     // returns an html element to be used as a linker to the person's data
     create_card() {
         
@@ -292,10 +294,7 @@ class Person {
         return sibling_icon
     }
 
-    // show profile.. click out of the box should close?
-    // we could pass in whether the view should be display?
-    // or edit?
-
+    // large method. handles all things profile related
     profile() {
 
         var profile_div = document.createElement('div');
@@ -896,6 +895,51 @@ class Person {
 
 }
 
+// add grab movement to tree_container when on a desktop
+function panning_movement() {
+    //position object with the nec properties
+    let pos = { top: 0, left: 0, x: 0, y: 0 };
+    
+    const mouseDownHandler = function(e) {
+        // Change the cursor and prevent user from selecting the text
+        tree_container.style.cursor = 'grabbing';
+        tree_container.style.userSelect = 'none';
+        
+        pos = {
+            // The current scroll 
+            left: tree_container.scrollLeft,
+            top: tree_container.scrollTop,
+            // Get the current mouse position
+            x: e.clientX,
+            y: e.clientY,
+        };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+    };
+
+    const mouseMoveHandler = function(e) {
+        // How far the mouse has been moved
+        const dx = e.clientX - pos.x;
+        const dy = e.clientY - pos.y;
+    
+        // Scroll the element
+        tree_container.scrollTop = pos.top - dy;
+        tree_container.scrollLeft = pos.left - dx;
+    };
+
+    const mouseUpHandler = function() {
+        tree_container.style.cursor = 'grab';
+        tree_container.style.removeProperty('user-select');
+
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+
+    };
+
+    document.addEventListener('mousedown', mouseDownHandler);
+
+}
 
 // to delete this person from all javascript and post AJAX to remove from db
 function delete_person(id) {
