@@ -190,37 +190,58 @@ class Person {
         branch_container.className = 'branch';
         branch_container.style.order = branch_number;
         
-       
 
         // create leaves
-        if( branch_number > 2 ) {
-            // this is exponential based on value above branch 2
-            // number 2 to the power of the branch numberish
-            var leaf_count = Math.pow( 2 , (branch_number - 2) );
 
-            var flex_basis = 100 / leaf_count;
-
-            // make the leaves and add them to the branch
-            for( let leaf = 0; leaf < leaf_count; leaf++ ) {
-                var new_leaf = document.createElement('div');
-                new_leaf.className = 'leaf';
-                //new_leaf.style.flexBasis = flex_basis + '%';
-                new_leaf.style.width = '500px';
-                new_leaf.style.justifyContent = 'space-around';
-                branch_container.appendChild(new_leaf);
-                branch_object.leaves.push(new_leaf);
-            }
-        } else {
-            var only_leaf = document.createElement('div');
-            only_leaf.className = 'leaf';
-            if( branch_number == 2 ) {
-                //only_leaf.style.flexBasis = '100%';
-                only_leaf.style.justifyContent = 'space-around';
-            }
-            branch_container.appendChild(only_leaf);
-            branch_object.leaves.push(only_leaf);
+        // this is exponential based on value above branch 2
+        // number 2 to the power of the branch numberish
+        // this calculates the number of leaves within a branch
+        var leaf_count = Math.pow( 2 , (branch_number - 2) );
+        if( leaf_count == 0) {
+            leaf_count += 1;
         }
 
+        // widen all branches according to the latest branch
+        var all_branches = document.getElementsByClassName('branch');
+        if(all_branches) {
+            for( let branch of all_branches ) {
+                console.log(branch);
+                branch.style.width = (leaf_count * 1000) + 'px';
+            }
+            branch_container.style.width = (leaf_count * 1000) + 'px';
+        }
+
+        // make the leaves and add them to the branch
+        for( let leaf = 0; leaf < leaf_count; leaf++ ) {
+            var new_leaf = document.createElement('div');
+            new_leaf.className = 'leaf';
+            new_leaf.style.width = '500px';
+            new_leaf.style.justifyContent = 'space-around';
+            branch_container.appendChild(new_leaf);
+            branch_object.leaves.push(new_leaf);
+        }
+
+        // last leaf count gives you the branch width of every branch
+        
+        // the last branch leaf size is 500px
+        // leaves below it double in width. double the leaf width above...
+
+        // existing leaves get widths changed according to how far they are from
+        // the top of the tree.
+        let leaves = document.getElementsByClassName('leaf');
+        if(leaves) {
+            for( let each_leaf of leaves) {
+                var branch_num = parseInt(each_leaf.parentElement.style.order);
+                // number away from top of tree
+                var exponent = (leaf_count - branch_num);
+                // 2 to the power of that number
+                var multiplier = Math.pow(2, exponent);
+                each_leaf.style.width = (500 * multiplier) + 'px';
+            }
+
+        }
+    
+        
 
         tree_container.appendChild(branch_container);
         
@@ -1342,8 +1363,15 @@ function build_tree(selected_person) {
         // should remove 1 item starting at index zero
 
     }
-    
 
+    // set scroll position of tree container?
+    var leaves = document.getElementsByClassName('leaf');
+    var leaf_width = parseInt(leaves[0].style.width);
+    var tree_width = tree_container.offsetWidth;
+    var center_pos = (leaf_width - tree_width) / 2;
+    console.log(center_pos);
+    tree_container.scrollLeft = center_pos;
+    
 }
 
 
@@ -1462,8 +1490,11 @@ plus_icon.addEventListener('click', create_new_person);
 plus_icon.className = 'button';
 plus_icon.alt = 'create a new person';
 
+
 var button2 = document.createElement('button');
-//button2.addEventListener('click', get_relation_list);
+button2.addEventListener('click', function(){
+
+});
 button2.className = 'button';
 button2.innerText = 'Create Relationship Button';
 
