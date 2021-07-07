@@ -32,7 +32,21 @@ body {
     overflow: auto;
     padding-bottom: 25vh;
     cursor: grab;
+    position: relative;
 }
+#svg_holder {
+    position: absolute;
+    z-index: -1;
+    float: left;
+    
+}
+.svg_path {
+    stroke: black;
+    stroke-width: 4;
+    fill:none;
+    
+}
+
 .navbar{
     display: flex;
     position: relative;
@@ -312,6 +326,7 @@ background-color: green;
     height: 30px;
     margin: 4px;
 }
+
 
 .person_div {
     flex-grow: 3;

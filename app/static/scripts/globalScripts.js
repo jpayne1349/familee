@@ -8,6 +8,10 @@ var RELATION_ARRAY = [];
 
 var tree_container = document.getElementById('tree_container');
 
+var svg_holder = document.getElementById('svg_holder');
+
+// set svg holder width according to widest branch
+
 var body = document.body;
 
 
@@ -15,7 +19,7 @@ var body = document.body;
 function main() {
     // this calls everything else right now!
     get_person_list();
-    if(window.innerWidth > 1000) {
+    if(window.innerWidth > 800) {
         console.log('starting panning function. window width = ', window.innerWidth);
         panning_movement();
         //document.addEventListener('mousedown', function(event) {console.log(event.path);});
@@ -92,6 +96,7 @@ class Person {
         if(this.hasCard == true) {
             return this.cardHolder;
         }
+
         var card_container = document.createElement('div');
         card_container.className = 'card';
         card_container.id = this.id;
@@ -210,6 +215,8 @@ class Person {
                 branch.style.width = (leaf_count * 1000) + 'px';
             }
             branch_container.style.width = (leaf_count * 1000) + 'px';
+            // widen svg holder to latest branch width
+            svg_holder.style.width = (leaf_count * 1000) + 'px';
         }
 
         // make the leaves and add them to the branch
@@ -242,9 +249,11 @@ class Person {
 
         }
     
-        
-
+    
         tree_container.appendChild(branch_container);
+
+        // set svg_holder height based on tree container size
+        svg_holder.style.height = (tree_container.offsetHeight * 0.75) + 'px';
         
         branch_object.branch = branch_container;
 
@@ -900,7 +909,7 @@ function panning_movement() {
     let pos = { top: 0, left: 0, x: 0, y: 0 };
     
     const mouseDownHandler = function(e) {
-        
+        console.log(e);
         // makes sure mouse down is in the tree container
         if(e.target.id == 'tree_container' || e.target.className == 'leaf') {
 
@@ -1338,8 +1347,16 @@ function update_tree() {
     //remove all cards
     console.log('OLD TREE - ', PERSON_ARRAY, RELATION_ARRAY);
 
-    var tree = document.getElementById('tree_container');
-    removeAllChildNodes(tree);
+    // empty svg_holder
+    removeAllChildNodes(svg_holder);
+
+    // empty tree container.
+    removeAllChildNodes(tree_container);
+
+    // add back the svg_holder?
+    tree_container.append(svg_holder);
+
+    
 
     // unset some properties determined in build_tree
     for( let person of PERSON_ARRAY) {
@@ -1393,8 +1410,8 @@ function build_tree(selected_person) {
         for( let sibling of person_to_build.siblings ) {
             let sib_icon = sibling.sibling_icon();
             person_to_build.sibling_div.insertBefore(sib_icon, person_to_build.sibling_div.firstElementChild);
-            sibling.hasCard = true;
-            sibling.cardHolder = sib_icon;
+            //sibling.hasCard = true;
+            //sibling.cardHolder = sib_icon;
         }
 
         // loop through their parents and set their branchLevel & cardNumber, and add them to the buffer
@@ -1420,10 +1437,136 @@ function build_tree(selected_person) {
     var tree_width = tree_container.offsetWidth;
     var center_pos = (leaf_width - tree_width) / 2;
 
+    // centering on the tree doesn't need to be done on update call?
     tree_container.scrollLeft = center_pos;
+
+    // build paths?
+    build_paths();
     
 }
 
+// we want to scan the tree and build bezier paths between connected cards
+function build_paths() {
+
+    for( let person of PERSON_ARRAY) {
+        // persons location on the screen..
+        if( person.hasCard ) {
+            var child_card = person.cardHolder;
+            var child_points = {
+                // these will change 
+                origin_x:child_card.offsetLeft,
+                origin_y:child_card.offsetTop
+
+                // right x, right y , etc
+            }
+
+        }
+
+        // just build path to parents
+        for( let parent of person.parents ) {
+            // each one will create a new path.. 
+            if(parent.hasCard) {
+                var parent_card = parent.cardHolder;
+                var parent_point = {
+                    origin_x:parent_card.offsetLeft,
+                    origin_y:parent_card.offsetTop
+                }
+
+                // parent is on the left above
+                if( parent_point.origin_x < child_points.origin_x ) {
+                    
+                    // create the path
+                    var new_path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                    new_path.setAttribute('class', 'svg_path');
+
+                    // offsets from the origin values created above
+                    var child_y_offset = 50;
+                    var parent_x_offset = 100;
+                    var parent_y_offset = 75;
+
+                    var parent_target_y = parent_point.origin_y + parent_y_offset;
+                    var parent_target_x = parent_point.origin_x + parent_x_offset;
+
+                    var child_target_y = child_points.origin_y + child_y_offset;
+                    var child_target_x = child_points.origin_x;
+    
+                    var m_value = 'M' + child_target_x + ',' + child_target_y + ' ';
+
+                    var c_value = 'C' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + parent_target_y;
+
+                    var data = m_value + c_value;
+    
+                    new_path.setAttributeNS(null, "d", data);
+
+                    svg_holder.appendChild(new_path);
+
+                    // parent is on the right above
+                } else if (parent_point.origin_x > child_points.origin_x) {     
+                    // create the path
+                    
+                    var new_path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                    new_path.setAttribute('class', 'svg_path');
+
+                    console.log(parent_point, child_points);
+
+                    // offsets from the origin values created above
+                    var child_x_offset = 200;
+                    var child_y_offset = 50;
+                    var parent_x_offset = 100;
+                    var parent_y_offset = 75;
+
+                    var parent_target_y = parent_point.origin_y + parent_y_offset;
+                    var parent_target_x = parent_point.origin_x + parent_x_offset;
+
+                    var child_target_y = child_points.origin_y + child_y_offset;
+                    var child_target_x = child_points.origin_x + child_x_offset;
+    
+                    var m_value = 'M' + child_target_x + ',' + child_target_y + ' ';
+
+                    var c_value = 'C' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + parent_target_y;
+
+                    var data = m_value + c_value;
+    
+                    new_path.setAttributeNS(null, "d", data);
+
+                    svg_holder.appendChild(new_path);
+                    
+                    // parent is directly above!
+                } else {
+                    var new_path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                    new_path.setAttribute('class', 'svg_path');
+
+                    console.log(parent_point, child_points);
+
+                    // offsets from the origin values created above
+                    var child_x_offset = 100;
+                    var child_y_offset = 20;
+                    var parent_x_offset = 100;
+                    var parent_y_offset = 75;
+
+                    var parent_target_y = parent_point.origin_y + parent_y_offset;
+                    var parent_target_x = parent_point.origin_x + parent_x_offset;
+
+                    var child_target_y = child_points.origin_y + child_y_offset;
+                    var child_target_x = child_points.origin_x + child_x_offset;
+    
+                    var m_value = 'M' + child_target_x + ',' + child_target_y + ' ';
+
+                    var c_value = 'C' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + child_target_y + ' ' + parent_target_x + ',' + parent_target_y;
+
+                    var data = m_value + c_value;
+    
+                    new_path.setAttributeNS(null, "d", data);
+
+                    svg_holder.appendChild(new_path);
+
+                }
+
+            }
+        }
+
+    }
+}
 
 // used to update the current properties of people in a relation entry
 function create_relationship(relation_entry_object) {
