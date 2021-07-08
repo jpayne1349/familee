@@ -386,7 +386,18 @@ background-color: green;
 }
 
 #settings_container {
+    display: flex;
+    position: absolute;
+    left: -50vw;
+    width: 50vw;
+    height: 100vh;
+    z-index: 2;
+    transition: transform 0.2s ease-in;
+    background-color: #2196F3;
+}
 
+.settings_visible {
+    transform: translateX(50vw)
 }
 
 #create_person_container {

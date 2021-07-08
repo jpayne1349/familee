@@ -915,7 +915,7 @@ function panning_movement() {
     let pos = { top: 0, left: 0, x: 0, y: 0 };
     
     const mouseDownHandler = function(e) {
-        console.log(e);
+        //console.log(e);
         // makes sure mouse down is in the tree container
         if(e.target.id == 'tree_container' || e.target.className == 'leaf') {
 
@@ -1313,8 +1313,21 @@ function create_new_person() {
                 // this should leave us in a state where both global arrays are updated
                 update_tree();
                 
-                // TODO: this is removing the form container after post???
-                container.remove();
+                // should just clear the form fields..
+                var inputs = document.getElementsByTagName('input');
+                var details_textarea = document.getElementsByTagName('textarea');
+                for( let input of inputs ) {
+                    input.value = '';
+                    if(input.type == 'checkbox') {
+                        input.checked = false;
+                    }
+                }
+                for( let detail of details_textarea) {
+                    detail.value = '';
+                }
+
+                // close container
+                container.classList.remove('new_person_visible');
                 
             };
 
@@ -1414,16 +1427,14 @@ function update_new_person_relation_options(build_bool) {
 
 }
 
-// settings menu and contained options
+// settings menu and contained options, will build on run
 function settings_menu() {
 
     // this will be an appended div to the navbar, similar to create person
     var settings_container = document.createElement('div');
     settings_container.id = 'settings_container';
 
-    
-    // the settings container, and the create_person_container, can't be open
-    // at the same time?
+    var navbar = document.getElementById('navbar');
     navbar.append(settings_container);
 }
 
@@ -1531,16 +1542,19 @@ function build_tree(selected_person) {
 
     }
 
-    // set scroll position of tree container?
-    var leaves = document.getElementsByClassName('leaf');
-    var leaf_width = parseInt(leaves[0].style.width);
+    var branches = document.getElementsByClassName('branch');
+    var branch_width = parseInt(branches[0].style.width);
+    
+    // viewable width of tree
     var tree_width = tree_container.offsetWidth;
-    var center_pos = (leaf_width - tree_width) / 2;
+
+    var center_pos = (branch_width - tree_width) / 2;
 
     // centering on the tree doesn't need to be done on update call?
     tree_container.scrollLeft = center_pos;
 
-    // build paths?
+
+    // build paths
     build_paths();
     
 }
@@ -1788,13 +1802,14 @@ function build_navbar_features() {
             create_person_div.classList.add('new_person_visible');
             var building = false;
             update_new_person_relation_options(false);
-            
+
         }
     });
     plus_icon.className = 'button';
     plus_icon.alt = 'create a new person';
     plus_icon.style.filter = 'invert(0.9)';
     plus_icon.style.width = '55px';
+
 
 
     var button2 = document.createElement('img');
@@ -1806,15 +1821,25 @@ function build_navbar_features() {
     button2.src = 'static/link.svg';
     button2.style.filter = 'invert(0.9)';
 
+    
+    // buildling settings menu here.
+    settings_menu();
+
     var settings_icon = document.createElement('img');
     settings_icon.src = 'static/settings.svg';
     settings_icon.className = 'button';
     settings_icon.id = 'settings';
     settings_icon.style.filter = 'invert(0.9)';
 
-    //settings_icon.innerText = 'Update Tree (dev only)';
-
-    settings_icon.addEventListener('click', settings_menu);
+    // toggle view of settings
+    settings_icon.addEventListener('click', function() {
+        var settings_menu = document.getElementById('settings_container');
+        if( settings_menu.classList.contains('settings_visible')) {
+            settings_menu.classList.remove('settings_visible');
+        } else {
+            settings_menu.classList.add('settings_visible');
+        }
+    });
 
 
     navbar_options.append(plus_icon, button2, settings_icon);
