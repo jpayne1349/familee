@@ -47,13 +47,16 @@ body {
     
 }
 
-.navbar{
+#navbar{
     display: flex;
     position: relative;
     justify-content: space-evenly;
     background-color: #001f3f;
     padding: 10px;
     align-items: center;
+    -webkit-box-shadow: 0px 0px 5px -2px black;
+	   -moz-box-shadow: 0px 0px 5px -2px black;
+	        box-shadow: 0px 0px 5px -2px black;
 }
 
 .navbar_options {
@@ -64,20 +67,11 @@ body {
     align-items: center;
 }
 
-.one-edge-shadow {
-	-webkit-box-shadow: 0px 0px 5px -2px black;
-	   -moz-box-shadow: 0px 0px 5px -2px black;
-	        box-shadow: 0px 0px 5px -2px black;
-}
-
 .button {
     width: 43px;
     height: auto;
     cursor: pointer;
     user-select: none;
-}
-#settings.button {
-    width: 32px;
 }
 
 
@@ -391,10 +385,14 @@ background-color: green;
     user-select: none;
 }
 
+#settings_container {
+
+}
+
 #create_person_container {
     display: flex;
     position: absolute;
-    left: 0px;
+    left: -50vw;
     width: 50vw;
     height: 100vh;
     z-index: 2;
@@ -402,7 +400,7 @@ background-color: green;
 }
 
 .new_person_visible {
-    transform: translateX(-50vw)
+    transform: translateX(50vw)
 }
 
 #create_person_form {

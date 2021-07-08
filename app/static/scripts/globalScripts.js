@@ -18,6 +18,12 @@ var body = document.body;
 // run on page load?
 function main() {
     // this calls everything else right now!
+
+    // we should run functions like, populate navbar
+    // should be calling create_new_person, settings_menu, etc.
+    // which add the event listeners and what not.
+    build_navbar_features();
+
     get_person_list();
     if(window.innerWidth > 800) {
         console.log('starting panning function. window width = ', window.innerWidth);
@@ -1014,17 +1020,18 @@ function delete_person(id) {
 
 // call when needing to add a person to the database
 function create_new_person() {
+    // initial creation..?
+    // 
     // perform a check to see if this form is already available?
-    var existing_form = document.getElementById('create_person_container')
-    if(existing_form) {
-        existing_form.classList.remove('new_person_visible');
-        return
-    }
+    // var existing_form = document.getElementById('create_person_container')
+    // if(existing_form) {
+    //     existing_form.classList.remove('new_person_visible');
+    //     return
+    // }
 
     // maybe we just have a popup for now. just something quick
     let container = document.createElement('div');
     container.id = 'create_person_container';
-    container.classList.add('new_person_visible');
 
     let form_holder = document.createElement('form');
     form_holder.name = 'create_person';
@@ -1035,7 +1042,7 @@ function create_new_person() {
     hide_form.id = 'hide_form';
     hide_form.addEventListener('click', function(){ 
         // edit classList of #create_person_container
-        container.classList.add('new_person_visible');
+        container.classList.remove('new_person_visible');
         // container.remove(); 
     });
     form_holder.appendChild(hide_form);
@@ -1149,62 +1156,71 @@ function create_new_person() {
     details.placeholder = 'Details';
     details_div.appendChild(details);
     form_holder.appendChild(details_div);
-
-    if( PERSON_ARRAY.length > 0) {
-        let relation_div = document.createElement('div');
-        relation_div.className = 'input_div';
-        let relation_type_label = document.createElement('label');
-        relation_type_label.className = 'input_label';
-        relation_type_label.innerText = 'This is a ';
-        let relation_type_select = document.createElement('select');
-        relation_type_select.className = 'select_input';
-        relation_type_select.id = 'relation_type_select';
-        let parent_option = document.createElement('option');
-        parent_option.innerText = 'Parent';
-        parent_option.className = 'option_input';
-        parent_option.value = 'a';
-        let sibling_option = document.createElement('option');
-        sibling_option.innerText = 'Sibling';
-        sibling_option.className = 'option_input';
-        sibling_option.value = 'c';
-        let child_option = document.createElement('option');
-        child_option.innerText = 'Child';
-        child_option.className = 'option_input';
-        child_option.value = 'b';
-        relation_type_select.append(parent_option, sibling_option, child_option);
-        let of_label = document.createElement('label');
-        of_label.className = 'input_label';
-        of_label.innerText = ' of ';
-        let person_select = document.createElement('select');
-        person_select.className = 'select_input';
-        person_select.id = 'person_select';
-        //build options in a loop based on the people availables
-        for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
-            let person = PERSON_ARRAY[i];
-            // filters out siblings. so you can't add blind relationships
-            if(person.cardHolder) {
-                if( person.cardHolder.className.includes('sibling_icon')) {
-                    continue
-                }
-            }
-            let new_option = document.createElement('option');
-            new_option.value = person.id;
-            new_option.innerText = person.givenName;
-            new_option.className = 'option_input';
-            person_select.appendChild(new_option);
-        }
-        relation_div.append(relation_type_label, relation_type_select, of_label, person_select);
-        form_holder.append(relation_div);
     
-    } else { // this is the first created person
-        let relation_div = document.createElement('div');
-        relation_div.className = 'input_div';
-        let relation_type_label = document.createElement('label');
-        relation_type_label.className = 'input_label';
-        relation_type_label.innerText = 'This person will be automatically assigned as the ROOT of the tree';
-        relation_div.append(relation_type_label);
-        form_holder.append(relation_div);
-    }
+    // so we'll make the div and add it, then modify it on the fly with a function
+    //
+    let relation_div = document.createElement('div');
+    relation_div.className = 'input_div';
+    relation_div.id = 'new_person_relationship_options';
+
+    form_holder.append(relation_div);
+    // this need to be a callable somehow?
+    // 
+    // if( PERSON_ARRAY.length > 0) {
+    //     let relation_div = document.createElement('div');
+    //     relation_div.className = 'input_div';
+    //     let relation_type_label = document.createElement('label');
+    //     relation_type_label.className = 'input_label';
+    //     relation_type_label.innerText = 'This is a ';
+    //     let relation_type_select = document.createElement('select');
+    //     relation_type_select.className = 'select_input';
+    //     relation_type_select.id = 'relation_type_select';
+    //     let parent_option = document.createElement('option');
+    //     parent_option.innerText = 'Parent';
+    //     parent_option.className = 'option_input';
+    //     parent_option.value = 'a';
+    //     let sibling_option = document.createElement('option');
+    //     sibling_option.innerText = 'Sibling';
+    //     sibling_option.className = 'option_input';
+    //     sibling_option.value = 'c';
+    //     let child_option = document.createElement('option');
+    //     child_option.innerText = 'Child';
+    //     child_option.className = 'option_input';
+    //     child_option.value = 'b';
+    //     relation_type_select.append(parent_option, sibling_option, child_option);
+    //     let of_label = document.createElement('label');
+    //     of_label.className = 'input_label';
+    //     of_label.innerText = ' of ';
+    //     let person_select = document.createElement('select');
+    //     person_select.className = 'select_input';
+    //     person_select.id = 'person_select';
+    //     //build options in a loop based on the people availables
+    //     for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
+    //         let person = PERSON_ARRAY[i];
+    //         // filters out siblings. so you can't add blind relationships
+    //         if(person.cardHolder) {
+    //             if( person.cardHolder.className.includes('sibling_icon')) {
+    //                 continue
+    //             }
+    //         }
+    //         let new_option = document.createElement('option');
+    //         new_option.value = person.id;
+    //         new_option.innerText = person.givenName;
+    //         new_option.className = 'option_input';
+    //         person_select.appendChild(new_option);
+    //     }
+    //     relation_div.append(relation_type_label, relation_type_select, of_label, person_select);
+    //     form_holder.append(relation_div);
+    
+    // } else { // this is the first created person
+    //     let relation_div = document.createElement('div');
+    //     relation_div.className = 'input_div';
+    //     let relation_type_label = document.createElement('label');
+    //     relation_type_label.className = 'input_label';
+    //     relation_type_label.innerText = 'This person will be automatically assigned as the ROOT of the tree';
+    //     relation_div.append(relation_type_label);
+    //     form_holder.append(relation_div);
+    // }
 
     let create_div = document.createElement('div');
     create_div.className = 'create_div';
@@ -1218,8 +1234,13 @@ function create_new_person() {
 
     container.appendChild(form_holder);
     
+    var navbar = document.getElementById('navbar');
     // we now want to create this form somehow off the existing side_menu
     navbar.append(container);
+
+    var building = true;
+    // callable to refresh
+    update_new_person_relation_options(building);
 
     // may do a timeout?
     setTimeout(function (){
@@ -1330,16 +1351,95 @@ function create_new_person() {
 
 }
 
+// callable to populate/refresh options for relationships when creating a new person
+function update_new_person_relation_options(build_bool) {
+
+    var relation_div = document.getElementById('new_person_relationship_options');
+
+    // clear it for repopulation..
+    if(!build_bool) { removeAllChildNodes(relation_div); }
+
+    if( PERSON_ARRAY.length > 0) {
+        
+        let relation_type_label = document.createElement('label');
+        relation_type_label.className = 'input_label';
+        relation_type_label.innerText = 'This is a ';
+        let relation_type_select = document.createElement('select');
+        relation_type_select.className = 'select_input';
+        relation_type_select.id = 'relation_type_select';
+        let parent_option = document.createElement('option');
+        parent_option.innerText = 'Parent';
+        parent_option.className = 'option_input';
+        parent_option.value = 'a';
+        let sibling_option = document.createElement('option');
+        sibling_option.innerText = 'Sibling';
+        sibling_option.className = 'option_input';
+        sibling_option.value = 'c';
+        let child_option = document.createElement('option');
+        child_option.innerText = 'Child';
+        child_option.className = 'option_input';
+        child_option.value = 'b';
+        relation_type_select.append(parent_option, sibling_option, child_option);
+        let of_label = document.createElement('label');
+        of_label.className = 'input_label';
+        of_label.innerText = ' of ';
+        let person_select = document.createElement('select');
+        person_select.className = 'select_input';
+        person_select.id = 'person_select';
+        //build options in a loop based on the people availables
+        for(let i = 0; i < PERSON_ARRAY.length; i++ ) {
+            let person = PERSON_ARRAY[i];
+            // filters out siblings. so you can't add blind relationships
+            if(person.cardHolder) {
+                if( person.cardHolder.className.includes('sibling_icon')) {
+                    continue
+                }
+            }
+            let new_option = document.createElement('option');
+            new_option.value = person.id;
+            new_option.innerText = person.givenName;
+            new_option.className = 'option_input';
+            person_select.appendChild(new_option);
+        }
+        relation_div.append(relation_type_label, relation_type_select, of_label, person_select);
+    
+    } else { // this is the first created person
+
+        let relation_type_label = document.createElement('label');
+        relation_type_label.className = 'input_label';
+        relation_type_label.innerText = 'This person will be automatically assigned as the ROOT of the tree';
+        relation_div.append(relation_type_label);
+        
+    }
+
+}
+
+// settings menu and contained options
+function settings_menu() {
+
+    // this will be an appended div to the navbar, similar to create person
+    var settings_container = document.createElement('div');
+    settings_container.id = 'settings_container';
+
+    
+    // the settings container, and the create_person_container, can't be open
+    // at the same time?
+    navbar.append(settings_container);
+}
+
+
 function myDateFormat(js_date) {
         let new_date = js_date.replace(/-/g, '');
         return new_date
     }
 
+// explanatory..
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
         parent.removeChild(parent.firstChild);
     }
 }
+
 // this should eventually just append something to the tree. right now, to complicated to see
 // for now, this will delete tree and rebuild
 function update_tree() {
@@ -1482,7 +1582,7 @@ function build_paths() {
                     // offsets from the origin values created above
                     var child_y_offset = 50;
                     var parent_x_offset = 100;
-                    var parent_y_offset = 75;
+                    var parent_y_offset = 70;
 
                     var parent_target_y = parent_point.origin_y + parent_y_offset;
                     var parent_target_x = parent_point.origin_x + parent_x_offset;
@@ -1507,13 +1607,11 @@ function build_paths() {
                     var new_path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
                     new_path.setAttribute('class', 'svg_path');
 
-                    console.log(parent_point, child_points);
-
                     // offsets from the origin values created above
                     var child_x_offset = 200;
                     var child_y_offset = 50;
                     var parent_x_offset = 100;
-                    var parent_y_offset = 75;
+                    var parent_y_offset = 70;
 
                     var parent_target_y = parent_point.origin_y + parent_y_offset;
                     var parent_target_x = parent_point.origin_x + parent_x_offset;
@@ -1536,13 +1634,11 @@ function build_paths() {
                     var new_path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
                     new_path.setAttribute('class', 'svg_path');
 
-                    console.log(parent_point, child_points);
-
                     // offsets from the origin values created above
                     var child_x_offset = 100;
                     var child_y_offset = 20;
                     var parent_x_offset = 100;
-                    var parent_y_offset = 75;
+                    var parent_y_offset = 70;
 
                     var parent_target_y = parent_point.origin_y + parent_y_offset;
                     var parent_target_x = parent_point.origin_x + parent_x_offset;
@@ -1669,43 +1765,62 @@ function get_relation_list() {
 }
 
 
-var navbar_class = document.getElementsByClassName('navbar');
-var navbar = navbar_class[0];
-navbar.classList.add('one-edge-shadow');
+function build_navbar_features() { 
 
-var navbar_options = document.createElement('div');
-navbar_options.className = 'navbar_options';
+    var navbar = document.getElementById('navbar');
 
+    var navbar_options = document.createElement('div');
+    navbar_options.className = 'navbar_options';
 
-var plus_icon = document.createElement('img');
-plus_icon.src = 'static/add-user.svg';
-plus_icon.addEventListener('click', create_new_person);
-plus_icon.className = 'button';
-plus_icon.alt = 'create a new person';
-plus_icon.style.filter = 'invert(0.9)';
-plus_icon.style.width = '55px';
-
-
-var button2 = document.createElement('img');
-button2.addEventListener('click', function(){
-    console.log('create link button pressed! ');
-});
-button2.className = 'button';
-//button2.innerText = 'Create Relationship Button';
-button2.src = 'static/link.svg';
-button2.style.filter = 'invert(0.9)';
-
-var settings_icon = document.createElement('img');
-settings_icon.src = 'static/refresh.svg';
-settings_icon.className = 'button';
-settings_icon.id = 'settings';
-settings_icon.style.filter = 'invert(0.9)';
-
-//settings_icon.innerText = 'Update Tree (dev only)';
-
-settings_icon.addEventListener('click', update_tree);
+    // create person container here?
+    create_new_person();
+    
+    // should just display the create person div, not create it.
+    var plus_icon = document.createElement('img');
+    plus_icon.src = 'static/add-user.svg';
+    // toggle class to show/hide
+    // so we have to update some parts of the function everytime it's opened?
+    plus_icon.addEventListener('click', function(){
+        var create_person_div = document.getElementById('create_person_container');
+        if( create_person_div.classList.contains('new_person_visible')) {
+            create_person_div.classList.remove('new_person_visible');
+        } else {
+            create_person_div.classList.add('new_person_visible');
+            var building = false;
+            update_new_person_relation_options(false);
+        }
+    });
+    plus_icon.className = 'button';
+    plus_icon.alt = 'create a new person';
+    plus_icon.style.filter = 'invert(0.9)';
+    plus_icon.style.width = '55px';
 
 
-navbar_options.append(plus_icon, button2, settings_icon);
-navbar.appendChild(navbar_options);
+    var button2 = document.createElement('img');
+    button2.addEventListener('click', function(){
+        console.log('create link button pressed! ');
+    });
+    button2.className = 'button';
+    //button2.innerText = 'Create Relationship Button';
+    button2.src = 'static/link.svg';
+    button2.style.filter = 'invert(0.9)';
+
+    var settings_icon = document.createElement('img');
+    settings_icon.src = 'static/settings.svg';
+    settings_icon.className = 'button';
+    settings_icon.id = 'settings';
+    settings_icon.style.filter = 'invert(0.9)';
+
+    //settings_icon.innerText = 'Update Tree (dev only)';
+
+    settings_icon.addEventListener('click', settings_menu);
+
+
+    navbar_options.append(plus_icon, button2, settings_icon);
+    navbar.appendChild(navbar_options);
+
+
+}
+
+
 
