@@ -400,7 +400,7 @@ background-color: green;
 }
 
 .settings_visible {
-    transform: translateX(25vw)
+    transform: translateX(calc(20vw + 74px))
 }
 
 .hide_settings {
@@ -477,7 +477,7 @@ background-color: green;
 }
 
 .new_person_visible {
-    transform: translateX(55vw)
+    transform: translateX(calc(50vw + 74px));
 }
 
 #create_person_form {

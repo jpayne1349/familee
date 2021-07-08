@@ -88,10 +88,7 @@ class Person {
             let n = this.siblings.indexOf(selected_person);
             this.siblings.splice(n, 1);
         }
-        if(this.partners.includes(selected_person)) {
-            let n = this.partners.indexOf(selected_person);
-            this.partners.splice(n, 1);
-        }
+
     }
 
     // returns an html element to be used as a linker to the person's data
@@ -192,6 +189,7 @@ class Person {
                     branch_object.leaves.push(leaf);
                 }
 
+                // object containing a .branch element and a .leaves list_of_elements
                 return branch_object
             }
         }
@@ -201,14 +199,13 @@ class Person {
         branch_container.className = 'branch';
         branch_container.style.order = branch_number;
         
-
         // create leaves
 
         // this is exponential based on value above branch 2
         // number 2 to the power of the branch numberish
         // this calculates the number of leaves within a branch
         var leaf_count = Math.pow( 2 , (branch_number - 2) );
-        if( leaf_count == 0) {
+        if( leaf_count == 0.5) {
             leaf_count += 1;
         }
 
@@ -245,10 +242,16 @@ class Person {
             for( let each_leaf of leaves) {
                 var branch_num = parseInt(each_leaf.parentElement.style.order);
                 // number away from top of tree
+                // leaf count inside this equation is always the highest branches leaf count...
                 var exponent = (leaf_count - branch_num);
                 // 2 to the power of that number
+                // because we have only 1 leaf on branches 1 and 2, the math gets messed up.
+                if(leaf_count== 2) { exponent += 1; }
                 var multiplier = Math.pow(2, exponent);
-                each_leaf.style.width = (500 * multiplier) + 'px';
+                var leaf_width = 500 * multiplier;
+                each_leaf.style.width = leaf_width + 'px';
+
+                console.log('highest branch leaf count',leaf_count,'branch_num', branch_num, 'exponent',exponent, 'multiplier', multiplier, 'leaf width', leaf_width);
             }
 
         }
@@ -962,7 +965,7 @@ function panning_movement() {
 
 // to delete this person from all javascript and post AJAX to remove from db
 function delete_person(id) {
-        
+        console.log('deleting id', id);
         let person_object = person_from_id(id);
 
         // removal from relation array
@@ -1571,7 +1574,6 @@ function removeAllChildNodes(parent) {
 function update_tree() {
     // crude way of finding root right now. as there is no way to change the root yet
     //remove all cards
-    console.log('OLD TREE - ', PERSON_ARRAY, RELATION_ARRAY);
 
     // empty svg_holder
     removeAllChildNodes(svg_holder);
