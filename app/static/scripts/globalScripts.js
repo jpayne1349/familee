@@ -1788,6 +1788,7 @@ function build_navbar_features() {
             create_person_div.classList.add('new_person_visible');
             var building = false;
             update_new_person_relation_options(false);
+            
         }
     });
     plus_icon.className = 'button';
