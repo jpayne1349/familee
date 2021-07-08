@@ -51,8 +51,6 @@ class Person {
         this.siblings = [];
         this.children = [];
         this.parents = [];
-        this.partners = [];
-
 
         this.branchLevel;
         this.cardNumber;
@@ -1434,9 +1432,126 @@ function settings_menu() {
     var settings_container = document.createElement('div');
     settings_container.id = 'settings_container';
 
+    var hide_settings = document.createElement('div');
+    hide_settings.className = 'hide_settings';
+    hide_settings.addEventListener('click', function() {
+        settings_container.classList.remove('settings_visible');
+    });
+
+    var json_download_button = document.createElement('div');
+    json_download_button.innerText = 'Download';
+    json_download_button.className = 'json_button';
+    json_download_button.id = 'download_json';
+    json_download_button.addEventListener('click', download_json);
+
+    var json_upload_button = document.createElement('div');
+    json_upload_button.innerText = 'Upload';
+    json_upload_button.className = 'json_button';
+    json_upload_button.id = 'upload_json';
+    json_upload_button.addEventListener('click', upload_json);
+
+    var json_options_button = document.createElement('div');
+    json_options_button.className = 'json_options_button';
+    json_options_button.innerText = 'Upload/Download JSON';
+    json_options_button.addEventListener('click', function() {
+        if( json_options_button.classList.contains('show')) {
+            json_options_button.classList.remove('show');
+            json_download_button.classList.remove('show');
+            json_upload_button.classList.remove('show');
+        } else {
+            json_options_button.classList.add('show');
+            json_download_button.classList.add('show');
+            json_upload_button.classList.add('show');
+        }
+    });
+
+
+    settings_container.append(hide_settings, json_options_button, json_download_button, json_upload_button);
+
     var navbar = document.getElementById('navbar');
     navbar.append(settings_container);
 }
+
+// called by button. converts the global arrays to json and triggers download
+function download_json() {
+
+    // create a copy that only includes non js side data
+    var person_array_copy = [];
+    for (let person of PERSON_ARRAY) {
+        var person_copy = {};
+        person_copy.id = person.id;
+        person_copy.givenName = person.givenName;
+        person_copy.familyName = person.familyName;
+        person_copy.dateOfBirth = person.dateOfBirth;
+        person_copy.dateOfDeath = person.dateOfDeath;
+        person_copy.details = person.details;
+        person_copy.gender = person.gender;
+
+        person_array_copy.push(person_copy);
+    }
+
+    var data_array = [person_array_copy , RELATION_ARRAY];
+    var json_string = JSON.stringify(data_array);
+    var export_string = "data:text/json;charset=utf-8," + encodeURIComponent(json_string);
+
+    var download_element = document.createElement('a');
+    download_element.setAttribute('href', export_string);
+    download_element.setAttribute('download', 'testing_family_tree.json');
+    document.body.append(download_element);
+    download_element.click();
+    download_element.remove();
+
+}
+
+
+function upload_json() {
+    var choose_file_button = document.createElement('input');
+    choose_file_button.type = 'file';
+
+    choose_file_button.click();
+
+    choose_file_button.addEventListener('change', function() {
+        const selected_file = choose_file_button.files[0];
+        console.log(selected_file);
+        console.log(selected_file.name);
+        upload(selected_file);
+    });
+
+
+    // This will upload the file after having read it
+    const upload = (file) => {
+        fetch('/upload_json', { // Your POST endpoint
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: file // This is your file object
+        }).then(
+            function(response) {
+                // a method of the response object .json
+                // returns a promise after determining if it is json or not
+                response.json().then( function(result){ 
+                    // resulting items can be parsed to build a tree.
+
+                    console.log(result);
+                });
+            }
+        );
+    };
+
+  
+
+}
+
+function downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
 
 
 function myDateFormat(js_date) {

@@ -138,6 +138,14 @@ def add_relationship():
     
 
     return 'added'
+
+@main_blueprint.route('/upload_json', methods=['POST'])
+def upload_json():
+    uploaded_json = request.json
+
+    response_json = json.dumps(uploaded_json)
+
+    return response_json
 # turns the database objects into a python dictionary, which can be converted to JSON
 # TODO: manual input of the attributes was required. Maybe it's not neccessary? the properties of an object can be collected in a loop? 
 def personObjectsToJson(person_list):

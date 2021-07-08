@@ -65,6 +65,7 @@ body {
     height: 80vh;
     justify-content: space-evenly;
     align-items: center;
+    z-index: 2;
 }
 
 .button {
@@ -388,16 +389,81 @@ background-color: green;
 #settings_container {
     display: flex;
     position: absolute;
-    left: -50vw;
-    width: 50vw;
+    left: -20vw;
+    width: 20vw;
     height: 100vh;
-    z-index: 2;
+    z-index: 1;
     transition: transform 0.2s ease-in;
-    background-color: #2196F3;
+    background-color: #001f3f;
+    flex-direction: column;
+    padding: 25px 0 25px 0;
 }
 
 .settings_visible {
-    transform: translateX(50vw)
+    transform: translateX(25vw)
+}
+
+.hide_settings {
+    border: none;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    align-self: flex-end;
+    position: relative;
+    margin-right: 11px;
+    margin-bottom: 25px;
+}
+
+.hide_settings:before, .hide_settings:after {
+    position: absolute;
+    left: 9px;
+    content: ' ';
+    height: 24px;
+    width: 2px;
+    background-color: #a1adb8;
+}
+.hide_settings:before {
+    transform: rotate(
+        45deg
+        );
+}
+.hide_settings:after {
+    transform: rotate(
+-45deg
+);
+}
+
+.json_options_button {
+    color: #a1adb8;
+    font-size: 20px;
+    cursor: pointer;
+    user-select: none;
+    padding: 5px;
+    text-align: center;
+    border-left: 1px solid #a1adb8;
+
+}
+.json_options_button:hover {
+    background-color: #00274e;
+}
+
+.json_button {
+    background-color: #a1adb8;
+    color: #001f3f;
+    text-align: right;
+    padding: 5px 25px 5px 0px;
+    font-size: 20px;
+    border-left: 1px solid #001f3f;
+    cursor: pointer;
+    user-select: none;
+    display:none;
+}
+.json_button:hover {
+    background-color: #99a8b7;
+
+}
+.json_button.show {
+    display: block;
 }
 
 #create_person_container {
@@ -411,7 +477,7 @@ background-color: green;
 }
 
 .new_person_visible {
-    transform: translateX(50vw)
+    transform: translateX(55vw)
 }
 
 #create_person_form {
