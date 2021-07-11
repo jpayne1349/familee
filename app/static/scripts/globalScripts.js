@@ -206,18 +206,18 @@ class Person {
         // this calculates the number of leaves within a branch
         var leaf_count = Math.pow( 2 , (branch_number - 2) );
         if( leaf_count == 0.5) {
-            leaf_count += 1;
+            leaf_count = 1;
         }
 
         // widen all branches according to the latest branch
         var all_branches = document.getElementsByClassName('branch');
         if(all_branches) {
             for( let branch of all_branches ) {
-                branch.style.width = (leaf_count * 1000) + 'px';
+                branch.style.width = (leaf_count * 500) + 'px';
             }
-            branch_container.style.width = (leaf_count * 1000) + 'px';
+            branch_container.style.width = (leaf_count * 500) + 'px';
             // widen svg holder to latest branch width
-            svg_holder.style.width = (leaf_count * 1000) + 'px';
+            svg_holder.style.width = (leaf_count * 500) + 'px';
         }
 
         // make the leaves and add them to the branch
@@ -230,28 +230,24 @@ class Person {
             branch_object.leaves.push(new_leaf);
         }
 
-        // last leaf count gives you the branch width of every branch
-        
-        // the last branch leaf size is 500px
-        // leaves below it double in width. double the leaf width above...
-
-        // existing leaves get widths changed according to how far they are from
-        // the top of the tree.
+        // resize all lower leaves
         let leaves = document.getElementsByClassName('leaf');
         if(leaves) {
-            for( let each_leaf of leaves) {
-                var branch_num = parseInt(each_leaf.parentElement.style.order);
-                // number away from top of tree
-                // leaf count inside this equation is always the highest branches leaf count...
-                var exponent = (leaf_count - branch_num);
-                // 2 to the power of that number
-                // because we have only 1 leaf on branches 1 and 2, the math gets messed up.
-                if(leaf_count== 2) { exponent += 1; }
-                var multiplier = Math.pow(2, exponent);
-                var leaf_width = 500 * multiplier;
-                each_leaf.style.width = leaf_width + 'px';
+            for( let leaf of leaves) {
 
-                console.log('highest branch leaf count',leaf_count,'branch_num', branch_num, 'exponent',exponent, 'multiplier', multiplier, 'leaf width', leaf_width);
+                var leaf_branch_number = leaf.parentElement.style.order;
+                var latest_branch_width = parseInt(branch_container.style.width);
+                var n_factor = leaf_branch_number - 2;
+                var multiplier = Math.pow(2, n_factor);
+
+                var leaf_width = latest_branch_width / multiplier;
+
+                if(leaf_branch_number < 3 ) {
+                    leaf_width = latest_branch_width;
+                }
+                
+                leaf.style.width = leaf_width + 'px';
+
             }
 
         }
@@ -1630,7 +1626,10 @@ function build_tree(selected_person) {
         // theres a leaf present to place them in
         // divide by 2 and round to get the leaf number/ index
         let their_leaf_number = Math.round(person_to_build.cardNumber / 2);
-        branch_object.leaves[their_leaf_number - 1].appendChild(their_card);
+        // minues one makes up for array index start at zero
+        let their_leaf = branch_object.leaves[their_leaf_number -1];
+        their_leaf.appendChild(their_card);
+        
         their_card.style.order = person_to_build.cardNumber;
         
 
