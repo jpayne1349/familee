@@ -1,5 +1,7 @@
 A few notes for the startup of a new project.
 
+*** Notes are somewhat specific to MacOS.
+
 1. create a new virtual env with: python3 -m venv env
 
 2. getting into environment: source env/bin/activate
@@ -9,4 +11,11 @@ A few notes for the startup of a new project.
 
 4. create a .gitignore file if necessary.
 
-5. 
+5. link remote and local repos on gihub if necessary
+
+6. from within virtual environment, type "flask run" and server should start
+
+
+7+ include instructions for an sqlite database setup.
+
+a sample config file would also help someone get started.
